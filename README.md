@@ -1,6 +1,16 @@
 # NCBI C++ Toolkit package recipe
 
-## Quick start
+1. [Quick start.](#recipe_Start)
+2. What is Conan and why you might need it?
+3. Preparing work environment.
+4. Building your project.
+5. Define build options.
+6. Supported 3rd party packages.
+7. There are few things to note.
+8. Data serialization support.
+
+<a name="recipe_Start"></a>
+## Quick start.
 
 Clone this repository and export the recipe into the local Conan cache:
 
@@ -54,7 +64,7 @@ in user home directory, which, most likely does not have enough space. To place 
 you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
 
 
-## Building your project
+## Building your project.
 
 Let us build [blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application. It requires one source file and some unknown number of the Toolkit libraries. 
 What we know for sure is that we need *blastinput* library.
@@ -93,8 +103,7 @@ Configure and build:
 
 
 
-
-## Define build options
+## Define build options.
 
 NCBI C++ Toolkit libraries can be built as either shared or static ones. The same applies to external packages. 
 You can request desired options in conanfile.txt. For example, the following instructs Conan to use NCBI C++ Toolkit 
@@ -116,7 +125,7 @@ To switch between Debug and Release build types, you can use command line when i
     cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 
-## Supported 3rd party packages
+## Supported 3rd party packages.
 
 The Toolkit uses a number of 3-rd party packages. The following is the list of packages supported by *ncbi-cxx-toolkit-public* 
 Conan recipe (as of July 2021):
@@ -154,9 +163,9 @@ Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to r
 This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
 
 
-## Data serialization support
+## Data serialization support.
 
-### Datatool
+### Datatool.
 
 The Toolkit contains [datatool](https://ncbi.github.io/cxx-toolkit/pages/ch_app.html#ch_app.datatool) application, which can generate C++ data storage classes from ASN.1, DTD, XML schema or JSON schema specification. These classes can then be used to [read and write data](https://ncbi.github.io/cxx-toolkit/pages/ch_ser) in ASN.1, XML or JSON format.
 To add code generation into a project, use *NCBI_generate_cpp* command. For example:
