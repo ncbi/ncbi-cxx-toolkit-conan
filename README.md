@@ -8,7 +8,7 @@
 6. [Supported 3rd party packages.](#recipe_Other)
 7. [There are few things to note.](#recipe_Notes)
 8. [Data serialization support.](#recipe_Serial)
-9. [NCBI build process management.](#recipe_NCBIptb)
+9. [NCBIptb build process management.](#recipe_NCBIptb)
 
 <a name="recipe_Start"></a>
 ## Quick start.
