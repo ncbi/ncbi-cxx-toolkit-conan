@@ -174,6 +174,7 @@ First two parameters to *NCBI_generate_cpp* receive a list of generated files - 
 ### Protocol buffers and gRPC.
 
 [gRPC](https://grpc.io) is an open source high performance Remote Procedure Call framework. By default, gRPC uses [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview), Google’s open source mechanism for serializing structured data.
+
 First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
 
     [requires]
