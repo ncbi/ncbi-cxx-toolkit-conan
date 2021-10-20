@@ -1,13 +1,13 @@
 # NCBI C++ Toolkit package recipe
 
 1. [Quick start.](#recipe_Start)
-2. What is Conan and why you might need it?
-3. Preparing work environment.
-4. Building your project.
-5. Define build options.
-6. Supported 3rd party packages.
-7. There are few things to note.
-8. Data serialization support.
+2. [What is Conan and why you might need it?](#recipe_Conan)
+3. [Preparing work environment.](#recipe_Env)
+4. [Building your project.](#recipe_Build)
+5. [Define build options.](#recipe_Options)
+6. [Supported 3rd party packages.](#recipe_Other)
+7. [There are few things to note.](#recipe_Notes)
+8. [Data serialization support.](#recipe_Serial)
 
 <a name="recipe_Start"></a>
 ## Quick start.
@@ -30,6 +30,8 @@ Install the requirements and configure the projects
     conan install . --build missing
     cmake .
 
+
+<a name="recipe_Conan"></a>
 ## What is Conan and why you might need it?
 
 [Conan](https://docs.conan.io/en/latest/) is an Open Source package manager for C and C++ development, 
@@ -46,6 +48,7 @@ Using NCBI C++ Toolkit outside of NCBI is much more tricky. You need to download
 then the Toolkit itself. It is not always clear what exactly is required. Conan's help might be very useful in this scenario.
 
 
+<a name="recipe_Env"></a>
 ## Preparing work environment.
 
 First, you need Conan. For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html).
@@ -64,6 +67,7 @@ in user home directory, which, most likely does not have enough space. To place 
 you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
 
 
+<a name="recipe_Build"></a>
 ## Building your project.
 
 Let us build [blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application. It requires one source file and some unknown number of the Toolkit libraries. 
@@ -102,7 +106,7 @@ Configure and build:
     make
 
 
-
+<a name="recipe_Options"></a>
 ## Define build options.
 
 NCBI C++ Toolkit libraries can be built as either shared or static ones. The same applies to external packages. 
@@ -125,6 +129,7 @@ To switch between Debug and Release build types, you can use command line when i
     cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 
+<a name="recipe_Other"></a>
 ## Supported 3rd party packages.
 
 The Toolkit uses a number of 3-rd party packages. The following is the list of packages supported by *ncbi-cxx-toolkit-public* 
@@ -134,6 +139,7 @@ Conan recipe (as of July 2021):
     PCRE, PNG, PROTOBUF, SQLITE3, TIFF, XML, XSLT, UV, Z
 
 
+<a name="recipe_Notes"></a>
 ## There are few things to note.
 
 The whole Toolkit contains about 250 libraries. You probably do not need all of them. That is why it is highly 
@@ -163,6 +169,7 @@ Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to r
 This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
 
 
+<a name="recipe_Serial"></a>
 ## Data serialization support.
 
 ### Datatool.
