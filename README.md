@@ -142,18 +142,14 @@ library Conan will build and use 58 ones.
 all 250 toolkit libraries, as well as all external ones will be in that blob. This might work. The linker will figure out 
 what exactly it needs, but it definitely will be overwhelmed. Also, it takes more time to build libraries which you do not really need.
 
-There is yet another option which uses NCBI C++ Toolkit helper tools. Change your CMakeLists.txt to look as follows:
+Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to reference *blastinput* directly. Change your CMakeLists.txt to look as follows:
 
     cmake_minimum_required(VERSION 3.7)
     project(conanapp CXX)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
-    include(${CONAN_USER_NCBI-CXX-TOOLKIT-PUBLIC_TOOLS}) 
     add_executable(blast_demo blast_demo.cpp)
     target_link_libraries(blast_demo blastinput)
 
-That is, include *CONAN_USER_NCBI-CXX-TOOLKIT-PUBLIC_TOOLS* and do not use *CONAN_LIBS*. This is a slightly more flexible approach, 
-comparing to "standard" Conan in a sense that there is no single huge blob of libraries and you can add them into 
-*target_link_libraries* command one by one. For example, when you do not really know what you need from the Toolkit, 
-you might want to build all the libraries and then add them one by one.
+This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
 
