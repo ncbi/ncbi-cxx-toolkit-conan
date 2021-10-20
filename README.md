@@ -153,3 +153,43 @@ Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to r
 
 This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
 
+
+## Data serialization support
+
+### Datatool
+
+The Toolkit contains [datatool](https://ncbi.github.io/cxx-toolkit/pages/ch_app.html#ch_app.datatool) application, which can generate C++ data storage classes from ASN.1, DTD, XML schema or JSON schema specification. These classes can then be used to [read and write data](https://ncbi.github.io/cxx-toolkit/pages/ch_ser) in ASN.1, XML or JSON format.
+To add code generation into a project, use *NCBI_generate_cpp* command. For example:
+
+    cmake_minimum_required(VERSION 3.7)
+    project(conanapp CXX)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.asn)
+    add_executable(asn_demo asn_demo.cpp ${GEN_SOURCES} ${GEN_HEADRS})
+    target_link_libraries(asn_demo xser)
+
+First two parameters to *NCBI_generate_cpp* receive a list of generated files - sources and headers. After that goes one or more data specifications. Files will be generated during the build in the directory where the specification is.
+
+### Protocol buffers and gRPC.
+
+First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
+
+    [requires]
+    ncbi-cxx-toolkit-public/0.3.0
+    protobuf/3.17.1
+    grpc/1.38.0
+
+Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate_cpp*:
+
+    cmake_minimum_required(VERSION 3.7)
+    project(conanapp CXX)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.proto)
+    add_library(grpc_demo grpc_demo.cpp ${GEN_SOURCES} ${GEN_HEADRS})
+    
+By default, *NCBI_generate_cpp* generates *protocol buffers* files only. To instruct it to generate gRPC ones as well, use *GEN_OPTIONS* flags, like this:
+
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.proto GEN_OPTIONS grpc)
+
