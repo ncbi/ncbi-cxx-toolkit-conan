@@ -1599,5 +1599,4 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["ORIGLIBS"].defines.append("NDEBUG")
         self.cpp_info.components["ORIGLIBS"].cxxflags.append(self._get_CppStandard())
         self.cpp_info.components["ORIGLIBS"].builddirs.append("res")
-#----------------------------------------------------------------------------
-        self.user_info.TOOLS = self.package_folder + "/res/ncbi-cpp-toolkit.tools"
+        self.cpp_info.components["ORIGLIBS"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
