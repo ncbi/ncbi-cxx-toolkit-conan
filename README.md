@@ -8,6 +8,7 @@
 6. [Supported 3rd party packages.](#recipe_Other)
 7. [There are few things to note.](#recipe_Notes)
 8. [Data serialization support.](#recipe_Serial)
+9. [NCBI build process management.](#recipe_NCBIptb)
 
 <a name="recipe_Start"></a>
 ## Quick start.
@@ -210,4 +211,53 @@ Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate
 By default, *NCBI_generate_cpp* generates *protocol buffers* files only. To instruct it to generate gRPC ones as well, use *GEN_OPTIONS* flags, like this:
 
     NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.proto GEN_OPTIONS grpc)
+
+
+<a name="recipe_NCBIptb"></a>
+## NCBI build process management.
+
+NCBI C++ Toolkit includes [NCBIptb](https://ncbi.github.io/cxx-toolkit/pages/ch_cmconfig) - CMake wrapper, which can also be used with Conan.
+
+For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as well look like the following:
+
+    cmake_minimum_required(VERSION 3.7)
+    project(conanapp CXX)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+
+    NCBI_begin_app(blast_demo)
+      NCBI_sources(blast_demo)
+      NCBI_uses_toolkit_libraries(blastinput)
+    NCBI_end_app()
+
+Note that *NCBIptb* expects source tree root to have *include* and *src* subdirectories:
+
+    - root
+        - include
+            - ...
+        - src
+            - ...
+
+All header files are then expected to be in *include* and its subdirectories; sources - in *src*.
+
+In other words, your root *CMakeLists.txt* should look like this:
+
+    cmake_minimum_required(VERSION 3.7)
+    project(conanapp CXX)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+    NCBI_add_subdirectory(src)
+
+The *blast_demo* example above will also work, of course. But as long as you add more and more projects, it is practically imperative that you adopt the standard NCBIptb source tree structure.
+
+In case of data serialization projects, you should follow the standard *NCBIptb* practice - use *NCBI_dataspecs* function call. For example:
+
+    NCBI_begin_lib(asn_sample_lib)
+      NCBI_dataspecs(asn_sample_lib.asn)
+      NCBI_uses_toolkit_libraries(xser)
+    NCBI_end_lib()
+
+
+
+
 
