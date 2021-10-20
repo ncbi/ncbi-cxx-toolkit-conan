@@ -1,4 +1,3 @@
-
 # NCBI C++ Toolkit package recipe
 
 ## Quick start
@@ -43,22 +42,21 @@ First, you need Conan. For instructions of how to install Conan, please refer to
 
 Next, you need to add conan-center remote repository:
 
-    $ conan remote add conan-center https://conan.bintray.com
+    $ conan remote add conan-center https://center.conan.io
     $ conan remote list
-    conan-center: https://conan.bintray.com [Verify SSL: True]
+    conan-center: https://center.conan.io [Verify SSL: True]
 
 
 
 Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
 in user home directory, which, most likely does not have enough space. To place Conan's cache into another location, 
-you should define *CONAN_USER_HOME* environment variable.
+you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
 
-When you finish using conan, you can exit the python virtual environment via the deactivate command.
 
 ## Building your project
 
-Let us build *blast_demo* sample application. It requires one source file and some unknown number of the Toolkit libraries. 
+Let us build [blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application. It requires one source file and some unknown number of the Toolkit libraries. 
 What we know for sure is that we need *blastinput* library.
 
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
@@ -123,8 +121,8 @@ To switch between Debug and Release build types, you can use command line when i
 The Toolkit uses a number of 3-rd party packages. The following is the list of packages supported by *ncbi-cxx-toolkit-public* 
 Conan recipe (as of July 2021):
 
-    BerkeleyDB, BZ2, CASSANDRA, EXSLT, GIF, GRPC, JPEG, LMDB, LZO, MySQL, NGHTTP2, PCRE, PNG, PROTOBUF, SQLITE3, TIFF, XML, XSLT, UV, Z
-
+    BerkeleyDB, BZ2, CASSANDRA, EXSLT, GIF, GRPC, JPEG, LMDB, LZO, MySQL, NGHTTP2,
+    PCRE, PNG, PROTOBUF, SQLITE3, TIFF, XML, XSLT, UV, Z
 
 
 ## There are few things to note.
