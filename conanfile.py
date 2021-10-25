@@ -219,10 +219,14 @@ class NcbiCxxToolkit(ConanFile):
                 if pkg is not None:
                     print("Package requires ", pkg)
                     self.requires(pkg)
+#ATTENTION
+                    if req == "MySQL":
+                        self.requires("openssl/1.1.1l")
                     pkg = pkg[:pkg.find("/")]
                     if not pkg == "grpc":
                         self.options[pkg].shared = self.options.sharedDeps
                     if pkg in self.Conan_package_options.keys():
+#ATTENTION
 #TODO: automate this somehow (use Conan_package_options)
                         if pkg == "libnghttp2":
                             self.options[pkg].with_app = False
@@ -254,7 +258,8 @@ class NcbiCxxToolkit(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.configure(source_folder="src")
-        cmake.build()
+#        cmake.build()
+        self.run('cmake --build . %s -j 2' % cmake.build_config)
 
 #----------------------------------------------------------------------------
     def package(self):
@@ -281,6 +286,9 @@ class NcbiCxxToolkit(ConanFile):
                 pkg = pkg[:pkg.find("/")]
                 ref = pkg + "::" + pkg
                 self.cpp_info.components[req].requires = [ref]
+#ATTENTION
+                if req == "MySQL":
+                    self.cpp_info.components[req].requires.append("openssl::openssl")
             else:
                 self.cpp_info.components[req].libs = []
 
@@ -1597,6 +1605,6 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["ORIGLIBS"].defines.append("_DEBUG")
         else:
             self.cpp_info.components["ORIGLIBS"].defines.append("NDEBUG")
-        self.cpp_info.components["ORIGLIBS"].cxxflags.append(self._get_CppStandard())
+#        self.cpp_info.components["ORIGLIBS"].cxxflags.append(self._get_CppStandard())
         self.cpp_info.components["ORIGLIBS"].builddirs.append("res")
         self.cpp_info.components["ORIGLIBS"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
