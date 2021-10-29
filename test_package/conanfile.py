@@ -17,4 +17,4 @@ class NcbiCxxToolkitTest(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             os.chdir("bin")
-            self.run(".%sbasic_sample" % os.sep)
+            self.run(".%sbasic_sample" % os.sep, run_environment=True)
