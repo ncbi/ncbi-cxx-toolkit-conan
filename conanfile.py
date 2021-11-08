@@ -52,26 +52,27 @@ class NcbiCxxToolkit(ConanFile):
     }
     NCBI_to_Conan_requires = {
 #                Linux                  Macos               Windows
-"BACKWARD":     ("backward-cpp/1.5",    "",                 ""),
+#"BACKWARD":     ("backward-cpp/1.6",    "",                 ""),
+"BACKWARD":     (None,                  None,               None),
 "BerkeleyDB":   ("libdb/5.3.28",        "libdb/5.3.28",     "libdb/5.3.28"),
 "Boost":        ("boost/1.76.0",        "boost/1.76.0",     "boost/1.76.0"),
 "BZ2":          ("bzip2/1.0.8",         "bzip2/1.0.8",      "bzip2/1.0.8"),
 "CASSANDRA":    ("cassandra-cpp-driver/2.15.3", None,       None),
 "GIF":          ("giflib/5.2.1",        "giflib/5.2.1",     "giflib/5.2.1"),
-"GRPC":         ("grpc/1.38.0",         "grpc/1.38.0",      "grpc/1.38.0"),
+"GRPC":         ("grpc/1.39.1",         "grpc/1.39.1",      "grpc/1.39.1"),
 "JPEG":         ("libjpeg/9d",          "libjpeg/9d",       "libjpeg/9d"),
 "LMDB":         ("lmdb/0.9.29",         "lmdb/0.9.29",      "lmdb/0.9.29"),
 "LZO":          ("lzo/2.10",            "lzo/2.10",         "lzo/2.10"),
 "MySQL":        ("libmysqlclient/8.0.25", "libmysqlclient/8.0.25", "libmysqlclient/8.0.25"),
-"NGHTTP2":      ("libnghttp2/1.43.0",   "libnghttp2/1.43.0","libnghttp2/1.43.0"),
-"PCRE":         ("pcre/8.44",           "pcre/8.44",        "pcre/8.44"),
+"NGHTTP2":      ("libnghttp2/1.45.1",   "libnghttp2/1.45.1","libnghttp2/1.45.1"),
+"PCRE":         ("pcre/8.45",           "pcre/8.45",        "pcre/8.45"),
 "PNG":          ("libpng/1.6.37",       "libpng/1.6.37",    "libpng/1.6.37"),
 "PROTOBUF":     ("protobuf/3.17.1",     "protobuf/3.17.1",  "protobuf/3.17.1"),
-"SQLITE3":      ("sqlite3/3.35.5",      "sqlite3/3.35.5",   "sqlite3/3.35.5"),
-"TIFF":         ("libtiff/4.2.0",       "libtiff/4.2.0",    "libtiff/4.2.0"),
-"XML":          ("libxml2/2.9.10",      "libxml2/2.9.10",   "libxml2/2.9.10"),
+"SQLITE3":      ("sqlite3/3.36.0",      "sqlite3/3.36.0",   "sqlite3/3.36.0"),
+"TIFF":         ("libtiff/4.3.0",       "libtiff/4.3.0",    "libtiff/4.3.0"),
+"XML":          ("libxml2/2.9.12",      "libxml2/2.9.12",   "libxml2/2.9.12"),
 "XSLT":         ("libxslt/1.1.34",      "libxslt/1.1.34",   "libxslt/1.1.34"),
-"UV":           ("libuv/1.41.0",        "libuv/1.41.0",     "libuv/1.41.0"),
+"UV":           ("libuv/1.42.0",        "libuv/1.42.0",     "libuv/1.42.0"),
 "Z":            ("zlib/1.2.11",         "zlib/1.2.11",      "zlib/1.2.11"),
     }
     Conan_package_options = {
@@ -114,23 +115,6 @@ class NcbiCxxToolkit(ConanFile):
         if key in self.NCBI_to_Conan_requires.keys() and self.NCBI_to_Conan_requires[key][index]:
             return self.NCBI_to_Conan_requires[key][index]
         return None
-
-#----------------------------------------------------------------------------
-    def _get_CppStandard(self):
-        if self.settings.os == "Windows":
-            if self.settings.compiler.cppstd == "17":
-                return "/std:c++17"
-            else:
-                return "/std:c++14"
-        else:
-            if self.settings.compiler.cppstd == "gnu17":
-                return "-std=gnu++17"
-            elif self.settings.compiler.cppstd == "17":
-                return "-std=c++17"
-            elif self.settings.compiler.cppstd == "gnu14":
-                return "-std=gnu++14"
-            else:
-                return "-std=c++14"
 
 #----------------------------------------------------------------------------
     def _get_Source(self):
@@ -185,8 +169,11 @@ class NcbiCxxToolkit(ConanFile):
         return cmake
 
 #----------------------------------------------------------------------------
+#    def validate(self):
+#        if self.settings.compiler.get_safe("cppstd"):
+#            tools.check_min_cppstd(self, 17)
+
     def config_options(self):
-        tools.check_min_cppstd(self, 14)
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -310,9 +297,12 @@ class NcbiCxxToolkit(ConanFile):
             if "blast_app_util" in allexports:
                 self.cpp_info.components["blast_app_util"].libs = ["blast_app_util"]
                 self.cpp_info.components["blast_app_util"].requires = ["ncbi_blastinput"]
+            if "vdb2blast" in allexports:
+                self.cpp_info.components["vdb2blast"].libs = ["vdb2blast"]
+                self.cpp_info.components["vdb2blast"].requires = ["ncbi_blastinput", "VDB"]
             if "xbma_refiner_gui" in allexports:
                 self.cpp_info.components["xbma_refiner_gui"].libs = ["xbma_refiner_gui"]
-                self.cpp_info.components["xbma_refiner_gui"].requires = ["ncbi_algo_structure", "wx_tools"]
+                self.cpp_info.components["xbma_refiner_gui"].requires = ["ncbi_algo_structure", "wx_tools", "wxWidgets"]
             if "xngalign" in allexports:
                 self.cpp_info.components["xngalign"].libs = ["xngalign"]
                 self.cpp_info.components["xngalign"].requires = ["ncbi_blastinput", "xmergetree"]
@@ -375,22 +365,22 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xloader_cdd"].requires = ["cdd_access"]
             if "ncbi_xloader_csra" in allexports:
                 self.cpp_info.components["ncbi_xloader_csra"].libs = ["ncbi_xloader_csra"]
-                self.cpp_info.components["ncbi_xloader_csra"].requires = ["sraread"]
+                self.cpp_info.components["ncbi_xloader_csra"].requires = ["sraread", "VDB"]
             if "ncbi_xloader_lds2" in allexports:
                 self.cpp_info.components["ncbi_xloader_lds2"].libs = ["ncbi_xloader_lds2"]
                 self.cpp_info.components["ncbi_xloader_lds2"].requires = ["ncbi_lds2"]
             if "ncbi_xloader_snp" in allexports:
                 self.cpp_info.components["ncbi_xloader_snp"].libs = ["ncbi_xloader_snp"]
-                self.cpp_info.components["ncbi_xloader_snp"].requires = ["sraread", "dbsnp_ptis"]
+                self.cpp_info.components["ncbi_xloader_snp"].requires = ["sraread", "dbsnp_ptis", "VDB", "GRPC"]
             if "ncbi_xloader_sra" in allexports:
                 self.cpp_info.components["ncbi_xloader_sra"].libs = ["ncbi_xloader_sra"]
-                self.cpp_info.components["ncbi_xloader_sra"].requires = ["sraread"]
+                self.cpp_info.components["ncbi_xloader_sra"].requires = ["sraread", "VDB"]
             if "ncbi_xloader_vdbgraph" in allexports:
                 self.cpp_info.components["ncbi_xloader_vdbgraph"].libs = ["ncbi_xloader_vdbgraph"]
-                self.cpp_info.components["ncbi_xloader_vdbgraph"].requires = ["sraread"]
+                self.cpp_info.components["ncbi_xloader_vdbgraph"].requires = ["sraread", "VDB"]
             if "ncbi_xloader_wgs" in allexports:
                 self.cpp_info.components["ncbi_xloader_wgs"].libs = ["ncbi_xloader_wgs"]
-                self.cpp_info.components["ncbi_xloader_wgs"].requires = ["sraread"]
+                self.cpp_info.components["ncbi_xloader_wgs"].requires = ["sraread", "VDB"]
             if "ncbi_xreader_cache" in allexports:
                 self.cpp_info.components["ncbi_xreader_cache"].libs = ["ncbi_xreader_cache"]
                 self.cpp_info.components["ncbi_xreader_cache"].requires = ["ncbi_xreader"]
@@ -405,10 +395,10 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xreader_id2"].requires = ["ncbi_xreader"]
             if "ncbi_xreader_pubseqos" in allexports:
                 self.cpp_info.components["ncbi_xreader_pubseqos"].libs = ["ncbi_xreader_pubseqos"]
-                self.cpp_info.components["ncbi_xreader_pubseqos"].requires = ["ncbi_dbapi_driver", "ncbi_xreader", "xconnext"]
+                self.cpp_info.components["ncbi_xreader_pubseqos"].requires = ["ncbi_dbapi_driver", "ncbi_xreader"]
             if "ncbi_xreader_pubseqos2" in allexports:
                 self.cpp_info.components["ncbi_xreader_pubseqos2"].libs = ["ncbi_xreader_pubseqos2"]
-                self.cpp_info.components["ncbi_xreader_pubseqos2"].requires = ["ncbi_dbapi_driver", "ncbi_xreader", "eMyNCBI_result", "xconnext"]
+                self.cpp_info.components["ncbi_xreader_pubseqos2"].requires = ["ncbi_dbapi_driver", "ncbi_xreader", "eMyNCBI_result"]
 #6--------------------------------------------------------------------------
             if "cdd_access" in allexports:
                 self.cpp_info.components["cdd_access"].libs = ["cdd_access"]
@@ -436,7 +426,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xloader_asn_cache"].requires = ["asn_cache", "ncbi_seqext"]
             if "ncbi_xloader_bam" in allexports:
                 self.cpp_info.components["ncbi_xloader_bam"].libs = ["ncbi_xloader_bam"]
-                self.cpp_info.components["ncbi_xloader_bam"].requires = ["bamread", "ncbi_seqext"]
+                self.cpp_info.components["ncbi_xloader_bam"].requires = ["bamread", "ncbi_seqext", "VDB"]
             if "ncbi_xloader_blastdb" in allexports:
                 self.cpp_info.components["ncbi_xloader_blastdb"].libs = ["ncbi_xloader_blastdb"]
                 self.cpp_info.components["ncbi_xloader_blastdb"].requires = ["ncbi_seqext"]
@@ -448,7 +438,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xreader"].requires = ["ncbi_seqext"]
             if "psg_client" in allexports:
                 self.cpp_info.components["psg_client"].libs = ["psg_client"]
-                self.cpp_info.components["psg_client"].requires = ["ncbi_seqext", "xxconnect2"]
+                self.cpp_info.components["psg_client"].requires = ["ncbi_seqext", "xxconnect2", "UV", "NGHTTP2"]
             if "sraread" in allexports:
                 self.cpp_info.components["sraread"].libs = ["sraread"]
                 self.cpp_info.components["sraread"].requires = ["ncbi_seqext", "VDB"]
@@ -468,6 +458,9 @@ class NcbiCxxToolkit(ConanFile):
             if "ncbi_seqext" in allexports:
                 self.cpp_info.components["ncbi_seqext"].libs = ["ncbi_seqext"]
                 self.cpp_info.components["ncbi_seqext"].requires = ["ncbi_misc", "ncbi_eutils", "ncbi_trackmgr", "LMDB"]
+            if "pcassay2" in allexports:
+                self.cpp_info.components["pcassay2"].libs = ["pcassay2"]
+                self.cpp_info.components["pcassay2"].requires = ["ncbi_misc"]
             if "searchbyrsid" in allexports:
                 self.cpp_info.components["searchbyrsid"].libs = ["searchbyrsid"]
                 self.cpp_info.components["searchbyrsid"].requires = ["ncbi_trackmgr"]
@@ -486,7 +479,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["bamread"].requires = ["ncbi_seq", "VDB"]
             if "dbsnp_ptis" in allexports:
                 self.cpp_info.components["dbsnp_ptis"].libs = ["dbsnp_ptis"]
-                self.cpp_info.components["dbsnp_ptis"].requires = ["ncbi_seq", "grpc_integration", "PROTOBUF"]
+                self.cpp_info.components["dbsnp_ptis"].requires = ["ncbi_seq", "grpc_integration", "PROTOBUF", "GRPC", "Z"]
             if "eutils_client" in allexports:
                 self.cpp_info.components["eutils_client"].libs = ["eutils_client"]
                 self.cpp_info.components["eutils_client"].requires = ["ncbi_seq", "xmlwrapp"]
@@ -513,24 +506,24 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_trackmgr"].requires = ["ncbi_seq"]
             if "seqalign_util" in allexports:
                 self.cpp_info.components["seqalign_util"].libs = ["seqalign_util"]
-                self.cpp_info.components["seqalign_util"].requires = ["ncbi_seq", "Boost"]
+                self.cpp_info.components["seqalign_util"].requires = ["ncbi_seq", "test_boost", "Boost"]
 #3--------------------------------------------------------------------------
             if "dbapi_sample_base" in allexports:
                 self.cpp_info.components["dbapi_sample_base"].libs = ["dbapi_sample_base"]
-#                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "ncbi_xdbapi_ctlib", "ncbi_xdbapi_odbc", "xconnext"]
-                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "xconnext"]
+#                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "ncbi_xdbapi_ctlib", "ncbi_xdbapi_odbc", "Sybase", "ODBC"]
+                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100"]
             if "ncbi_seq" in allexports:
                 self.cpp_info.components["ncbi_seq"].libs = ["ncbi_seq"]
                 self.cpp_info.components["ncbi_seq"].requires = ["ncbi_pub"]
             if "odbc_ftds100" in allexports:
                 self.cpp_info.components["odbc_ftds100"].libs = ["odbc_ftds100"]
-                self.cpp_info.components["odbc_ftds100"].requires = ["tds_ftds100", "ncbi_xdbapi_odbc"]
+                self.cpp_info.components["odbc_ftds100"].requires = ["tds_ftds100", "ncbi_xdbapi_odbc", "ODBC"]
             if "python_ncbi_dbapi" in allexports:
                 self.cpp_info.components["python_ncbi_dbapi"].libs = ["python_ncbi_dbapi"]
-                self.cpp_info.components["python_ncbi_dbapi"].requires = ["ncbi_dbapi", "xconnext"]
+                self.cpp_info.components["python_ncbi_dbapi"].requires = ["ncbi_dbapi", "PYTHON"]
             if "sdbapi" in allexports:
                 self.cpp_info.components["sdbapi"].libs = ["sdbapi"]
-                self.cpp_info.components["sdbapi"].requires = ["ncbi_dbapi", "dbapi_util_blobstore", "ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "xconnext"]
+                self.cpp_info.components["sdbapi"].requires = ["ncbi_dbapi", "dbapi_util_blobstore", "ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100"]
 #2--------------------------------------------------------------------------
             if "ctransition_nlmzip" in allexports:
                 self.cpp_info.components["ctransition_nlmzip"].libs = ["ctransition_nlmzip"]
@@ -538,9 +531,6 @@ class NcbiCxxToolkit(ConanFile):
             if "dbapi_util_blobstore" in allexports:
                 self.cpp_info.components["dbapi_util_blobstore"].libs = ["dbapi_util_blobstore"]
                 self.cpp_info.components["dbapi_util_blobstore"].requires = ["ncbi_dbapi_driver"]
-            if "grpc_integration" in allexports:
-                self.cpp_info.components["grpc_integration"].libs = ["grpc_integration"]
-                self.cpp_info.components["grpc_integration"].requires = ["xconnext", "GRPC", "Z"]
             if "hydra_client" in allexports:
                 self.cpp_info.components["hydra_client"].libs = ["hydra_client"]
                 self.cpp_info.components["hydra_client"].requires = ["xmlwrapp"]
@@ -552,7 +542,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_pub"].requires = ["ncbi_general"]
             if "ncbi_xcache_bdb" in allexports:
                 self.cpp_info.components["ncbi_xcache_bdb"].libs = ["ncbi_xcache_bdb"]
-                self.cpp_info.components["ncbi_xcache_bdb"].requires = ["ncbi_bdb"]
+                self.cpp_info.components["ncbi_xcache_bdb"].requires = ["ncbi_bdb", "BerkeleyDB"]
             if "ncbi_xdbapi_ctlib" in allexports:
                 self.cpp_info.components["ncbi_xdbapi_ctlib"].libs = ["ncbi_xdbapi_ctlib"]
                 self.cpp_info.components["ncbi_xdbapi_ctlib"].requires = ["ncbi_dbapi_driver", "Sybase"]
@@ -564,10 +554,10 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xdbapi_ftds100"].requires = ["ct_ftds100", "ncbi_dbapi_driver"]
             if "ncbi_xdbapi_mysql" in allexports:
                 self.cpp_info.components["ncbi_xdbapi_mysql"].libs = ["ncbi_xdbapi_mysql"]
-                self.cpp_info.components["ncbi_xdbapi_mysql"].requires = ["ncbi_dbapi_driver", "MySQL"]
+                self.cpp_info.components["ncbi_xdbapi_mysql"].requires = ["ncbi_dbapi_driver"]
             if "ncbi_xdbapi_odbc" in allexports:
                 self.cpp_info.components["ncbi_xdbapi_odbc"].libs = ["ncbi_xdbapi_odbc"]
-                self.cpp_info.components["ncbi_xdbapi_odbc"].requires = ["ncbi_dbapi_driver", "ODBC"]
+                self.cpp_info.components["ncbi_xdbapi_odbc"].requires = ["ncbi_dbapi_driver", "ODBC", "SQLServer"]
             if "ncbi_xgrid2cgi" in allexports:
                 self.cpp_info.components["ncbi_xgrid2cgi"].libs = ["ncbi_xgrid2cgi"]
                 self.cpp_info.components["ncbi_xgrid2cgi"].requires = ["ncbi_web"]
@@ -586,6 +576,9 @@ class NcbiCxxToolkit(ConanFile):
             if "xasn" in allexports:
                 self.cpp_info.components["xasn"].libs = ["xasn"]
                 self.cpp_info.components["xasn"].requires = ["ncbi_web", "NCBI_C"]
+            if "xfcgi_mt" in allexports:
+                self.cpp_info.components["xfcgi_mt"].libs = ["xfcgi_mt"]
+                self.cpp_info.components["xfcgi_mt"].requires = ["ncbi_web"]
             if "xmlreaders" in allexports:
                 self.cpp_info.components["xmlreaders"].libs = ["xmlreaders"]
                 self.cpp_info.components["xmlreaders"].requires = ["xmlwrapp"]
@@ -599,9 +592,6 @@ class NcbiCxxToolkit(ConanFile):
             if "basic_sample_lib" in allexports:
                 self.cpp_info.components["basic_sample_lib"].libs = ["basic_sample_lib"]
                 self.cpp_info.components["basic_sample_lib"].requires = ["ncbi_core"]
-            if "connext" in allexports:
-                self.cpp_info.components["connext"].libs = ["connext"]
-                self.cpp_info.components["connext"].requires = ["ncbi_core"]
             if "ct_ftds100" in allexports:
                 self.cpp_info.components["ct_ftds100"].libs = ["ct_ftds100"]
                 self.cpp_info.components["ct_ftds100"].requires = ["tds_ftds100"]
@@ -611,18 +601,18 @@ class NcbiCxxToolkit(ConanFile):
             if "dtd_sample_lib" in allexports:
                 self.cpp_info.components["dtd_sample_lib"].libs = ["dtd_sample_lib"]
                 self.cpp_info.components["dtd_sample_lib"].requires = ["ncbi_core"]
+            if "grpc_integration" in allexports:
+                self.cpp_info.components["grpc_integration"].libs = ["grpc_integration"]
+                self.cpp_info.components["grpc_integration"].requires = ["ncbi_core", "GRPC", "Z"]
             if "gumbelparams" in allexports:
                 self.cpp_info.components["gumbelparams"].libs = ["gumbelparams"]
                 self.cpp_info.components["gumbelparams"].requires = ["ncbi_core"]
+            if "jaeger_tracer" in allexports:
+                self.cpp_info.components["jaeger_tracer"].libs = ["jaeger_tracer"]
+                self.cpp_info.components["jaeger_tracer"].requires = ["ncbi_core"]
             if "jsd_sample_lib" in allexports:
                 self.cpp_info.components["jsd_sample_lib"].libs = ["jsd_sample_lib"]
                 self.cpp_info.components["jsd_sample_lib"].requires = ["ncbi_core"]
-            if "lbsmdapi" in allexports:
-                self.cpp_info.components["lbsmdapi"].libs = ["lbsmdapi"]
-                self.cpp_info.components["lbsmdapi"].requires = ["ncbi_core"]
-            if "mghbn" in allexports:
-                self.cpp_info.components["mghbn"].libs = ["mghbn"]
-                self.cpp_info.components["mghbn"].requires = ["ncbi_core"]
             if "msbuild_dataobj" in allexports:
                 self.cpp_info.components["msbuild_dataobj"].libs = ["msbuild_dataobj"]
                 self.cpp_info.components["msbuild_dataobj"].requires = ["ncbi_core"]
@@ -640,7 +630,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_general"].requires = ["ncbi_core"]
             if "ncbi_image" in allexports:
                 self.cpp_info.components["ncbi_image"].libs = ["ncbi_image"]
-                self.cpp_info.components["ncbi_image"].requires = ["ncbi_core", "JPEG", "PNG", "TIFF", "GIF", "Z"]
+                self.cpp_info.components["ncbi_image"].requires = ["ncbi_core", "Z", "JPEG", "PNG", "GIF", "TIFF"]
             if "ncbi_web" in allexports:
                 self.cpp_info.components["ncbi_web"].libs = ["ncbi_web"]
                 self.cpp_info.components["ncbi_web"].requires = ["ncbi_core"]
@@ -652,7 +642,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xcache_netcache"].requires = ["ncbi_core"]
             if "psg_cassandra" in allexports:
                 self.cpp_info.components["psg_cassandra"].libs = ["psg_cassandra"]
-                self.cpp_info.components["psg_cassandra"].requires = ["ncbi_core", "CASSANDRA"]
+                self.cpp_info.components["psg_cassandra"].requires = ["ncbi_core"]
             if "psg_diag" in allexports:
                 self.cpp_info.components["psg_diag"].libs = ["psg_diag"]
                 self.cpp_info.components["psg_diag"].requires = ["ncbi_core"]
@@ -683,12 +673,6 @@ class NcbiCxxToolkit(ConanFile):
             if "xalgovmerge" in allexports:
                 self.cpp_info.components["xalgovmerge"].libs = ["xalgovmerge"]
                 self.cpp_info.components["xalgovmerge"].requires = ["ncbi_core"]
-            if self.tk_public:            
-                self.cpp_info.components["xconnext"].requires = ["ORIGLIBS"]
-            else:
-                if "xconnext" in allexports:
-                    self.cpp_info.components["xconnext"].libs = ["xconnext"]
-                    self.cpp_info.components["xconnext"].requires = ["ncbi_core"]
             if "xcser" in allexports:
                 self.cpp_info.components["xcser"].libs = ["xcser"]
                 self.cpp_info.components["xcser"].requires = ["ncbi_core"]
@@ -700,13 +684,13 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xfcgi"].requires = ["ncbi_core", "FASTCGI"]
             if "xmlwrapp" in allexports:
                 self.cpp_info.components["xmlwrapp"].libs = ["xmlwrapp"]
-                self.cpp_info.components["xmlwrapp"].requires = ["ncbi_core", "XSLT", "XML"]
+                self.cpp_info.components["xmlwrapp"].requires = ["ncbi_core", "XML", "XSLT"]
             if "xpbacktest" in allexports:
                 self.cpp_info.components["xpbacktest"].libs = ["xpbacktest"]
                 self.cpp_info.components["xpbacktest"].requires = ["ncbi_core"]
             if "xregexp_template_tester" in allexports:
                 self.cpp_info.components["xregexp_template_tester"].libs = ["xregexp_template_tester"]
-                self.cpp_info.components["xregexp_template_tester"].requires = ["ncbi_core"]
+                self.cpp_info.components["xregexp_template_tester"].requires = ["ncbi_core", "PCRE"]
             if "xsd_sample_lib" in allexports:
                 self.cpp_info.components["xsd_sample_lib"].libs = ["xsd_sample_lib"]
                 self.cpp_info.components["xsd_sample_lib"].requires = ["ncbi_core"]
@@ -715,18 +699,8 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xsoap"].requires = ["ncbi_core"]
             if "xxconnect2" in allexports:
                 self.cpp_info.components["xxconnect2"].libs = ["xxconnect2"]
-                self.cpp_info.components["xxconnect2"].requires = ["ncbi_core", "NGHTTP2", "UV"]
+                self.cpp_info.components["xxconnect2"].requires = ["ncbi_core", "UV", "NGHTTP2"]
 #0--------------------------------------------------------------------------
-#            if "bz2" in allexports:
-#                self.cpp_info.components["bz2"].libs = ["bz2"]
-#            if "z" in allexports:
-#                self.cpp_info.components["z"].libs = ["z"]
-#            if "lmdb" in allexports:
-#                self.cpp_info.components["lmdb"].libs = ["lmdb"]
-#                self.cpp_info.components["lmdb"].requires = ["ORIGLIBS"]
-#            if "regexp" in allexports:
-#                self.cpp_info.components["regexp"].libs = ["regexp"]
-#                self.cpp_info.components["regexp"].requires = ["ORIGLIBS"]
             if "clog" in allexports:
                 self.cpp_info.components["clog"].libs = ["clog"]
                 self.cpp_info.components["clog"].requires = ["ORIGLIBS"]
@@ -735,10 +709,10 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["edit_imgt_file"].requires = ["ORIGLIBS"]
             if "lapackwrapp" in allexports:
                 self.cpp_info.components["lapackwrapp"].libs = ["lapackwrapp"]
-                self.cpp_info.components["lapackwrapp"].requires = ["LAPACK", "ORIGLIBS"]
+                self.cpp_info.components["lapackwrapp"].requires = ["ORIGLIBS"]
             if "ncbi_core" in allexports:
                 self.cpp_info.components["ncbi_core"].libs = ["ncbi_core"]
-                self.cpp_info.components["ncbi_core"].requires = ["PCRE", "BZ2", "Z", "LZO", "ORIGLIBS"]
+                self.cpp_info.components["ncbi_core"].requires = ["PCRE", "Z", "BZ2", "LZO", "ORIGLIBS"]
             if "psg_protobuf" in allexports:
                 self.cpp_info.components["psg_protobuf"].libs = ["psg_protobuf"]
                 self.cpp_info.components["psg_protobuf"].requires = ["PROTOBUF", "ORIGLIBS"]
@@ -759,14 +733,17 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xaligncleanup"].requires = ["xalgoalignsplign", "prosplign"]
             if "xbma_refiner_gui" in allexports:
                 self.cpp_info.components["xbma_refiner_gui"].libs = ["xbma_refiner_gui"]
-                self.cpp_info.components["xbma_refiner_gui"].requires = ["xbma_refiner", "wx_tools"]
+                self.cpp_info.components["xbma_refiner_gui"].requires = ["xbma_refiner", "wx_tools", "wxWidgets"]
 #17--------------------------------------------------------------------------
             if "blast_app_util" in allexports:
                 self.cpp_info.components["blast_app_util"].libs = ["blast_app_util"]
-                self.cpp_info.components["blast_app_util"].requires = ["blastdb", "blastinput", "xblastformat"]
+                self.cpp_info.components["blast_app_util"].requires = ["blastdb", "xnetblast", "blastinput", "xblastformat"]
             if "prosplign" in allexports:
                 self.cpp_info.components["prosplign"].libs = ["prosplign"]
                 self.cpp_info.components["prosplign"].requires = ["xalgoalignutil"]
+            if "vdb2blast" in allexports:
+                self.cpp_info.components["vdb2blast"].libs = ["vdb2blast"]
+                self.cpp_info.components["vdb2blast"].requires = ["xblast", "blastinput", "VDB"]
             if "xalgoalignsplign" in allexports:
                 self.cpp_info.components["xalgoalignsplign"].libs = ["xalgoalignsplign"]
                 self.cpp_info.components["xalgoalignsplign"].requires = ["xalgoalignnw", "xalgoalignutil"]
@@ -822,20 +799,21 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xobjwrite"].requires = ["variation_utils", "xformat", "xobjread"]
             if "xvalidate" in allexports:
                 self.cpp_info.components["xvalidate"].libs = ["xvalidate"]
-                self.cpp_info.components["xvalidate"].requires = ["taxon1", "valerr", "xformat", "xobjedit", "submit"]
+                self.cpp_info.components["xvalidate"].requires = ["taxon1", "valerr", "xformat", "xobjedit", "submit", "taxon3"]
 #14--------------------------------------------------------------------------
             if "align_format" in allexports:
                 self.cpp_info.components["align_format"].libs = ["align_format"]
                 self.cpp_info.components["align_format"].requires = ["blast_services", "gene_info", "ncbi_xloader_genbank", "seqdb", "taxon1", "xalnmgr", "xcgi", "xhtml", "xobjread"]
             if "blast_unit_test_util" in allexports:
                 self.cpp_info.components["blast_unit_test_util"].libs = ["blast_unit_test_util"]
-                self.cpp_info.components["blast_unit_test_util"].requires = ["blastdb", "blast", "ncbi_xloader_genbank", "test_boost", "xobjutil", "Boost"]
+                self.cpp_info.components["blast_unit_test_util"].requires = ["blastdb", "xnetblast", "blast", "ncbi_xloader_genbank", "test_boost", "xobjutil", "Boost"]
             if "data_loaders_util" in allexports:
                 self.cpp_info.components["data_loaders_util"].libs = ["data_loaders_util"]
+#                self.cpp_info.components["data_loaders_util"].requires = ["ncbi_xdbapi_ftds", "ncbi_xloader_asn_cache", "ncbi_xloader_blastdb", "ncbi_xloader_genbank", "ncbi_xloader_lds2", "ncbi_xreader_pubseqos", "ncbi_xreader_pubseqos2", "ncbi_xloader_csra", "ncbi_xloader_wgs"]
                 self.cpp_info.components["data_loaders_util"].requires = ["ncbi_xdbapi_ftds", "ncbi_xloader_asn_cache", "ncbi_xloader_blastdb", "ncbi_xloader_genbank", "ncbi_xloader_lds2", "ncbi_xreader_pubseqos", "ncbi_xreader_pubseqos2"]
             if "hgvs" in allexports:
                 self.cpp_info.components["hgvs"].libs = ["hgvs"]
-                self.cpp_info.components["hgvs"].requires = ["entrez2cli", "ncbi_xloader_genbank", "objcoords", "variation", "xobjread", "xobjutil", "xregexp", "Boost"]
+                self.cpp_info.components["hgvs"].requires = ["entrez2cli", "ncbi_xloader_genbank", "objcoords", "variation", "xobjread", "xobjutil", "xregexp", "seq", "Boost"]
             if "ncbi_xloader_blastdb_rmt" in allexports:
                 self.cpp_info.components["ncbi_xloader_blastdb_rmt"].libs = ["ncbi_xloader_blastdb_rmt"]
                 self.cpp_info.components["ncbi_xloader_blastdb_rmt"].requires = ["blast_services", "ncbi_xloader_blastdb"]
@@ -847,7 +825,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xalgowinmask"].requires = ["submit", "seqmasks_io"]
             if "xdiscrepancy" in allexports:
                 self.cpp_info.components["xdiscrepancy"].libs = ["xdiscrepancy"]
-                self.cpp_info.components["xdiscrepancy"].requires = ["xcompress", "macro", "xcleanup"]
+                self.cpp_info.components["xdiscrepancy"].requires = ["xcompress", "macro", "xcleanup", "xobjedit"]
             if "xflatfile" in allexports:
                 self.cpp_info.components["xflatfile"].libs = ["xflatfile"]
                 self.cpp_info.components["xflatfile"].requires = ["xcleanup", "xlogging", "ncbi_xdbapi_ftds", "taxon1", "ncbi_xloader_genbank"]
@@ -866,13 +844,13 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["blastdb_format"].requires = ["seqdb", "xobjutil", "seqset"]
             if "fix_pub" in allexports:
                 self.cpp_info.components["fix_pub"].libs = ["fix_pub"]
-                self.cpp_info.components["fix_pub"].requires = ["eutils_client", "xobjedit"]
+                self.cpp_info.components["fix_pub"].requires = ["mlacli", "eutils_client", "xobjedit"]
             if "gene_info_writer" in allexports:
                 self.cpp_info.components["gene_info_writer"].libs = ["gene_info_writer"]
                 self.cpp_info.components["gene_info_writer"].requires = ["gene_info", "seqdb"]
             if "ncbi_xloader_bam" in allexports:
                 self.cpp_info.components["ncbi_xloader_bam"].libs = ["ncbi_xloader_bam"]
-                self.cpp_info.components["ncbi_xloader_bam"].requires = ["bamread", "xobjreadex"]
+                self.cpp_info.components["ncbi_xloader_bam"].requires = ["bamread", "xobjreadex", "seqset", "VDB"]
             if "ncbi_xloader_blastdb" in allexports:
                 self.cpp_info.components["ncbi_xloader_blastdb"].libs = ["ncbi_xloader_blastdb"]
                 self.cpp_info.components["ncbi_xloader_blastdb"].requires = ["seqdb", "seqset"]
@@ -896,7 +874,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xalgoseq"].requires = ["taxon1", "xalnmgr", "xregexp"]
             if "xbiosample_util" in allexports:
                 self.cpp_info.components["xbiosample_util"].libs = ["xbiosample_util"]
-                self.cpp_info.components["xbiosample_util"].requires = ["xmlwrapp", "xobjedit", "seqset", "macro"]
+                self.cpp_info.components["xbiosample_util"].requires = ["xmlwrapp", "xobjedit", "taxon3", "seqset", "macro", "valid"]
             if "xcleanup" in allexports:
                 self.cpp_info.components["xcleanup"].libs = ["xcleanup"]
                 self.cpp_info.components["xcleanup"].requires = ["xobjedit"]
@@ -921,16 +899,16 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xloader_lds2"].requires = ["lds2", "xobjmgr", "seq"]
             if "ncbi_xloader_snp" in allexports:
                 self.cpp_info.components["ncbi_xloader_snp"].libs = ["ncbi_xloader_snp"]
-                self.cpp_info.components["ncbi_xloader_snp"].requires = ["sraread", "seqset", "dbsnp_ptis"]
+                self.cpp_info.components["ncbi_xloader_snp"].requires = ["sraread", "seqset", "seq", "dbsnp_ptis", "grpc_integration", "VDB", "GRPC"]
             if "ncbi_xloader_sra" in allexports:
                 self.cpp_info.components["ncbi_xloader_sra"].libs = ["ncbi_xloader_sra"]
-                self.cpp_info.components["ncbi_xloader_sra"].requires = ["sraread", "seqset"]
+                self.cpp_info.components["ncbi_xloader_sra"].requires = ["sraread", "seqset", "VDB"]
             if "ncbi_xloader_vdbgraph" in allexports:
                 self.cpp_info.components["ncbi_xloader_vdbgraph"].libs = ["ncbi_xloader_vdbgraph"]
-                self.cpp_info.components["ncbi_xloader_vdbgraph"].requires = ["sraread", "seqset"]
+                self.cpp_info.components["ncbi_xloader_vdbgraph"].requires = ["sraread", "seqset", "VDB"]
             if "ncbi_xloader_wgs" in allexports:
                 self.cpp_info.components["ncbi_xloader_wgs"].libs = ["ncbi_xloader_wgs"]
-                self.cpp_info.components["ncbi_xloader_wgs"].requires = ["sraread", "seqset"]
+                self.cpp_info.components["ncbi_xloader_wgs"].requires = ["sraread", "seqset", "VDB"]
             if "ncbi_xreader_cache" in allexports:
                 self.cpp_info.components["ncbi_xreader_cache"].libs = ["ncbi_xreader_cache"]
                 self.cpp_info.components["ncbi_xreader_cache"].requires = ["ncbi_xreader"]
@@ -945,13 +923,13 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xreader_id2"].requires = ["ncbi_xreader"]
             if "ncbi_xreader_pubseqos" in allexports:
                 self.cpp_info.components["ncbi_xreader_pubseqos"].libs = ["ncbi_xreader_pubseqos"]
-                self.cpp_info.components["ncbi_xreader_pubseqos"].requires = ["dbapi_driver", "ncbi_xreader", "xconnext"]
+                self.cpp_info.components["ncbi_xreader_pubseqos"].requires = ["dbapi_driver", "ncbi_xreader"]
             if "ncbi_xreader_pubseqos2" in allexports:
                 self.cpp_info.components["ncbi_xreader_pubseqos2"].libs = ["ncbi_xreader_pubseqos2"]
-                self.cpp_info.components["ncbi_xreader_pubseqos2"].requires = ["dbapi_driver", "ncbi_xreader", "eMyNCBI_result", "xconnext"]
+                self.cpp_info.components["ncbi_xreader_pubseqos2"].requires = ["dbapi_driver", "ncbi_xreader", "eMyNCBI_result"]
             if "seqalign_util" in allexports:
                 self.cpp_info.components["seqalign_util"].libs = ["seqalign_util"]
-                self.cpp_info.components["seqalign_util"].requires = ["blastdb", "seq", "Boost"]
+                self.cpp_info.components["seqalign_util"].requires = ["blastdb", "seq", "test_boost", "Boost"]
             if "seqdb" in allexports:
                 self.cpp_info.components["seqdb"].libs = ["seqdb"]
                 self.cpp_info.components["seqdb"].requires = ["blastdb", "xobjmgr", "LMDB"]
@@ -966,7 +944,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xcddalignview"].requires = ["seq", "ncbimime"]
             if "xobjedit" in allexports:
                 self.cpp_info.components["xobjedit"].libs = ["xobjedit"]
-                self.cpp_info.components["xobjedit"].requires = ["eutils", "mlacli", "taxon3", "valid", "xobjread", "xobjutil"]
+                self.cpp_info.components["xobjedit"].requires = ["eutils", "esearch", "esummary", "mlacli", "taxon3", "valid", "xobjread", "xobjutil", "xlogging"]
             if "xobjimport" in allexports:
                 self.cpp_info.components["xobjimport"].libs = ["xobjimport"]
                 self.cpp_info.components["xobjimport"].requires = ["xobjutil"]
@@ -994,7 +972,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["id2cli"].requires = ["id2", "xconnect"]
             if "lds2" in allexports:
                 self.cpp_info.components["lds2"].libs = ["lds2"]
-                self.cpp_info.components["lds2"].requires = ["xcompress", "xobjread", "SQLITE3"]
+                self.cpp_info.components["lds2"].requires = ["xcompress", "xobjread", "sqlitewrapp", "SQLITE3"]
             if "ncbi_xloader_asn_cache" in allexports:
                 self.cpp_info.components["ncbi_xloader_asn_cache"].libs = ["ncbi_xloader_asn_cache"]
                 self.cpp_info.components["ncbi_xloader_asn_cache"].requires = ["libgeneral", "asn_cache", "xobjmgr"]
@@ -1009,7 +987,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbimime"].requires = ["cdd"]
             if "psg_client" in allexports:
                 self.cpp_info.components["psg_client"].libs = ["psg_client"]
-                self.cpp_info.components["psg_client"].requires = ["id2", "xconnserv", "xxconnect2"]
+                self.cpp_info.components["psg_client"].requires = ["id2", "seqsplit", "xconnserv", "xxconnect2", "UV", "NGHTTP2"]
             if "snputil" in allexports:
                 self.cpp_info.components["snputil"].libs = ["snputil"]
                 self.cpp_info.components["snputil"].requires = ["variation", "xobjmgr", "seqset"]
@@ -1042,7 +1020,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xnetblastcli"].requires = ["xconnect", "xnetblast"]
             if "xobjutil" in allexports:
                 self.cpp_info.components["xobjutil"].libs = ["xobjutil"]
-                self.cpp_info.components["xobjutil"].requires = ["xobjmgr"]
+                self.cpp_info.components["xobjutil"].requires = ["submit", "xobjmgr"]
 #10--------------------------------------------------------------------------
             if "cdd" in allexports:
                 self.cpp_info.components["cdd"].libs = ["cdd"]
@@ -1120,7 +1098,7 @@ class NcbiCxxToolkit(ConanFile):
 #8--------------------------------------------------------------------------
             if "dbsnp_ptis" in allexports:
                 self.cpp_info.components["dbsnp_ptis"].libs = ["dbsnp_ptis"]
-                self.cpp_info.components["dbsnp_ptis"].requires = ["seq", "grpc_integration", "PROTOBUF"]
+                self.cpp_info.components["dbsnp_ptis"].requires = ["seq", "grpc_integration", "PROTOBUF", "GRPC", "Z"]
             if "entrezgene" in allexports:
                 self.cpp_info.components["entrezgene"].libs = ["entrezgene"]
                 self.cpp_info.components["entrezgene"].requires = ["seq"]
@@ -1148,6 +1126,9 @@ class NcbiCxxToolkit(ConanFile):
             if "pcassay" in allexports:
                 self.cpp_info.components["pcassay"].libs = ["pcassay"]
                 self.cpp_info.components["pcassay"].requires = ["seq", "pcsubstance"]
+            if "pcassay2" in allexports:
+                self.cpp_info.components["pcassay2"].libs = ["pcassay2"]
+                self.cpp_info.components["pcassay2"].requires = ["seq", "pcsubstance"]
             if "remap" in allexports:
                 self.cpp_info.components["remap"].libs = ["remap"]
                 self.cpp_info.components["remap"].requires = ["seq"]
@@ -1220,7 +1201,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["sample_asn"].requires = ["libgeneral"]
             if "sdbapi" in allexports:
                 self.cpp_info.components["sdbapi"].libs = ["sdbapi"]
-                self.cpp_info.components["sdbapi"].requires = ["dbapi", "dbapi_util_blobstore", "ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "xutil", "xconnext"]
+                self.cpp_info.components["sdbapi"].requires = ["dbapi", "dbapi_util_blobstore", "ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "xutil", "xconnect"]
             if "valid" in allexports:
                 self.cpp_info.components["valid"].libs = ["valid"]
                 self.cpp_info.components["valid"].requires = ["libgeneral", "xregexp"]
@@ -1251,7 +1232,8 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ctransition_nlmzip"].requires = ["ctransition", "xcompress"]
             if "dbapi_sample_base" in allexports:
                 self.cpp_info.components["dbapi_sample_base"].libs = ["dbapi_sample_base"]
-                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "xutil", "xconnext"]
+#                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "dbapi_driver", "xutil", "ncbi_xdbapi_ctlib", "Sybase", "ODBC"]
+                self.cpp_info.components["dbapi_sample_base"].requires = ["ncbi_xdbapi_ftds", "ncbi_xdbapi_ftds100", "dbapi_driver", "xutil"]
             if "dbapi_util_blobstore" in allexports:
                 self.cpp_info.components["dbapi_util_blobstore"].libs = ["dbapi_util_blobstore"]
                 self.cpp_info.components["dbapi_util_blobstore"].requires = ["dbapi_driver", "xcompress"]
@@ -1300,9 +1282,6 @@ class NcbiCxxToolkit(ConanFile):
             if "genesbyloc" in allexports:
                 self.cpp_info.components["genesbyloc"].libs = ["genesbyloc"]
                 self.cpp_info.components["genesbyloc"].requires = ["xser"]
-            if "grpc_integration" in allexports:
-                self.cpp_info.components["grpc_integration"].libs = ["grpc_integration"]
-                self.cpp_info.components["grpc_integration"].requires = ["xutil", "xconnext", "GRPC"]
             if "hydra_client" in allexports:
                 self.cpp_info.components["hydra_client"].libs = ["hydra_client"]
                 self.cpp_info.components["hydra_client"].requires = ["xmlwrapp"]
@@ -1338,7 +1317,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["pmcidconv_client"].requires = ["xmlwrapp"]
             if "python_ncbi_dbapi" in allexports:
                 self.cpp_info.components["python_ncbi_dbapi"].libs = ["python_ncbi_dbapi"]
-                self.cpp_info.components["python_ncbi_dbapi"].requires = ["dbapi", "xutil", "xconnext"]
+                self.cpp_info.components["python_ncbi_dbapi"].requires = ["dbapi", "xutil", "PYTHON"]
             if "seqcode" in allexports:
                 self.cpp_info.components["seqcode"].libs = ["seqcode"]
                 self.cpp_info.components["seqcode"].requires = ["xser"]
@@ -1366,6 +1345,9 @@ class NcbiCxxToolkit(ConanFile):
             if "xcser" in allexports:
                 self.cpp_info.components["xcser"].libs = ["xcser"]
                 self.cpp_info.components["xcser"].requires = ["xser"]
+            if "xfcgi_mt" in allexports:
+                self.cpp_info.components["xfcgi_mt"].libs = ["xfcgi_mt"]
+                self.cpp_info.components["xfcgi_mt"].requires = ["xcgi", "FASTCGIPP"]
             if "xmlreaders" in allexports:
                 self.cpp_info.components["xmlreaders"].libs = ["xmlreaders"]
                 self.cpp_info.components["xmlreaders"].requires = ["xmlwrapp"]
@@ -1382,6 +1364,9 @@ class NcbiCxxToolkit(ConanFile):
             if "dbapi" in allexports:
                 self.cpp_info.components["dbapi"].libs = ["dbapi"]
                 self.cpp_info.components["dbapi"].requires = ["dbapi_driver"]
+            if "grpc_integration" in allexports:
+                self.cpp_info.components["grpc_integration"].libs = ["grpc_integration"]
+                self.cpp_info.components["grpc_integration"].requires = ["xutil", "GRPC", "Z"]
             if "gumbelparams" in allexports:
                 self.cpp_info.components["gumbelparams"].libs = ["gumbelparams"]
                 self.cpp_info.components["gumbelparams"].requires = ["tables", "xutil"]
@@ -1402,7 +1387,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["ncbi_xdbapi_odbc"].requires = ["dbapi_driver", "ODBC"]
             if "psg_cache" in allexports:
                 self.cpp_info.components["psg_cache"].libs = ["psg_cache"]
-                self.cpp_info.components["psg_cache"].requires = ["psg_protobuf", "psg_cassandra", "LMDB", "PROTOBUF"]
+                self.cpp_info.components["psg_cache"].requires = ["xncbi", "psg_protobuf", "psg_cassandra", "LMDB", "PROTOBUF", "CASSANDRA"]
             if "wx_tools" in allexports:
                 self.cpp_info.components["wx_tools"].libs = ["wx_tools"]
                 self.cpp_info.components["wx_tools"].requires = ["xutil", "wxWidgets"]
@@ -1414,22 +1399,16 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xcgi"].requires = ["xutil"]
             if "xcompress" in allexports:
                 self.cpp_info.components["xcompress"].libs = ["xcompress"]
-                self.cpp_info.components["xcompress"].requires = ["xutil", "BZ2", "Z", "LZO"]
-            if self.tk_public:            
-                self.cpp_info.components["xconnext"].requires = ["ORIGLIBS"]
-            else:
-                if "xconnext" in allexports:
-                    self.cpp_info.components["xconnext"].libs = ["xconnext"]
-                    self.cpp_info.components["xconnext"].requires = ["xconnect"]
+                self.cpp_info.components["xcompress"].requires = ["xutil", "Z", "BZ2", "LZO"]
             if "xfcgi" in allexports:
                 self.cpp_info.components["xfcgi"].libs = ["xfcgi"]
                 self.cpp_info.components["xfcgi"].requires = ["xutil", "FASTCGI"]
             if "xmlwrapp" in allexports:
                 self.cpp_info.components["xmlwrapp"].libs = ["xmlwrapp"]
-                self.cpp_info.components["xmlwrapp"].requires = ["xconnect", "XSLT", "XML"]
+                self.cpp_info.components["xmlwrapp"].requires = ["xconnect", "XML", "XSLT"]
             if "xregexp_template_tester" in allexports:
                 self.cpp_info.components["xregexp_template_tester"].libs = ["xregexp_template_tester"]
-                self.cpp_info.components["xregexp_template_tester"].requires = ["xregexp"]
+                self.cpp_info.components["xregexp_template_tester"].requires = ["xregexp", "PCRE"]
             if "xser" in allexports:
                 self.cpp_info.components["xser"].libs = ["xser"]
                 self.cpp_info.components["xser"].requires = ["xutil"]
@@ -1441,7 +1420,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xthrserv"].requires = ["xconnect", "xutil"]
             if "xxconnect2" in allexports:
                 self.cpp_info.components["xxconnect2"].libs = ["xxconnect2"]
-                self.cpp_info.components["xxconnect2"].requires = ["xconnect", "NGHTTP2", "UV"]
+                self.cpp_info.components["xxconnect2"].requires = ["xconnect", "UV", "NGHTTP2"]
 #1--------------------------------------------------------------------------
             if "basic_sample_lib" in allexports:
                 self.cpp_info.components["basic_sample_lib"].libs = ["basic_sample_lib"]
@@ -1449,9 +1428,6 @@ class NcbiCxxToolkit(ConanFile):
             if "blast" in allexports:
                 self.cpp_info.components["blast"].libs = ["blast"]
                 self.cpp_info.components["blast"].requires = ["composition_adjustment", "connect", "tables"]
-            if "connext" in allexports:
-                self.cpp_info.components["connext"].libs = ["connext"]
-                self.cpp_info.components["connext"].requires = ["connect"]
             if "connssl" in allexports:
                 self.cpp_info.components["connssl"].libs = ["connssl"]
                 self.cpp_info.components["connssl"].requires = ["connect"]
@@ -1467,12 +1443,9 @@ class NcbiCxxToolkit(ConanFile):
             if "gene_info" in allexports:
                 self.cpp_info.components["gene_info"].libs = ["gene_info"]
                 self.cpp_info.components["gene_info"].requires = ["xncbi"]
-            if "lbsmdapi" in allexports:
-                self.cpp_info.components["lbsmdapi"].libs = ["lbsmdapi"]
-                self.cpp_info.components["lbsmdapi"].requires = ["connect"]
-            if "mghbn" in allexports:
-                self.cpp_info.components["mghbn"].libs = ["mghbn"]
-                self.cpp_info.components["mghbn"].requires = ["connect"]
+            if "jaeger_tracer" in allexports:
+                self.cpp_info.components["jaeger_tracer"].libs = ["jaeger_tracer"]
+                self.cpp_info.components["jaeger_tracer"].requires = ["xncbi", "JAEGER"]
             if "odbc_ftds100" in allexports:
                 self.cpp_info.components["odbc_ftds100"].libs = ["odbc_ftds100"]
                 self.cpp_info.components["odbc_ftds100"].requires = ["tds_ftds100"]
@@ -1517,7 +1490,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xhtml"].requires = ["xncbi"]
             if "ximage" in allexports:
                 self.cpp_info.components["ximage"].libs = ["ximage"]
-                self.cpp_info.components["ximage"].requires = ["xncbi", "JPEG", "PNG", "TIFF", "GIF", "Z"]
+                self.cpp_info.components["ximage"].requires = ["xncbi", "Z", "JPEG", "PNG", "GIF", "TIFF"]
             if "xlogging" in allexports:
                 self.cpp_info.components["xlogging"].libs = ["xlogging"]
                 self.cpp_info.components["xlogging"].requires = ["xncbi"]
@@ -1538,7 +1511,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xutil"].requires = ["xncbi"]
             if "xxconnect" in allexports:
                 self.cpp_info.components["xxconnect"].libs = ["xxconnect"]
-                self.cpp_info.components["xxconnect"].requires = ["connect", "xncbi"]
+                self.cpp_info.components["xxconnect"].requires = ["xncbi", "NCBI_C"]
 #0--------------------------------------------------------------------------
             if "clog" in allexports:
                 self.cpp_info.components["clog"].libs = ["clog"]
@@ -1577,18 +1550,6 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["xncbi"].libs = ["xncbi"]
                 self.cpp_info.components["xncbi"].requires = ["BACKWARD", "ORIGLIBS"]
 #----------------------------------------------------------------------------
-#            if "bz2" in allexports:
-#                self.cpp_info.components["bz2"].libs = ["bz2"]
-#            if "z" in allexports:
-#                self.cpp_info.components["z"].libs = ["z"]
-#            if "lmdb" in allexports:
-#                self.cpp_info.components["lmdb"].libs = ["lmdb"]
-#                self.cpp_info.components["lmdb"].requires = ["ORIGLIBS"]
-#            if "regexp" in allexports:
-#                self.cpp_info.components["regexp"].libs = ["regexp"]
-#                self.cpp_info.components["regexp"].requires = ["ORIGLIBS"]
-#============================================================================
-#----------------------------------------------------------------------------
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].defines.append("_UNICODE")
             self.cpp_info.components["ORIGLIBS"].defines.append("_CRT_SECURE_NO_WARNINGS=1")
@@ -1605,6 +1566,5 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["ORIGLIBS"].defines.append("_DEBUG")
         else:
             self.cpp_info.components["ORIGLIBS"].defines.append("NDEBUG")
-#        self.cpp_info.components["ORIGLIBS"].cxxflags.append(self._get_CppStandard())
         self.cpp_info.components["ORIGLIBS"].builddirs.append("res")
         self.cpp_info.components["ORIGLIBS"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
