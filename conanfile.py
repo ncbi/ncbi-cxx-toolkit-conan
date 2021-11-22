@@ -55,7 +55,7 @@ class NcbiCxxToolkit(ConanFile):
 #"BACKWARD":     ("backward-cpp/1.6",    "",                 ""),
 "BACKWARD":     (None,                  None,               None),
 "BerkeleyDB":   ("libdb/5.3.28",        "libdb/5.3.28",     "libdb/5.3.28"),
-"Boost":        ("boost/1.76.0",        "boost/1.76.0",     "boost/1.76.0"),
+#"Boost":        ("boost/1.76.0",        "boost/1.76.0",     "boost/1.76.0"),
 "BZ2":          ("bzip2/1.0.8",         "bzip2/1.0.8",      "bzip2/1.0.8"),
 "CASSANDRA":    ("cassandra-cpp-driver/2.15.3", None,       None),
 "GIF":          ("giflib/5.2.1",        "giflib/5.2.1",     "giflib/5.2.1"),
@@ -160,6 +160,7 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
         if self.options.projects != "":
             cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.projects
         if self.options.targets != "":
