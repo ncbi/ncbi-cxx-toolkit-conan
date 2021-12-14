@@ -1,0 +1,8 @@
+sources:
+  0.0.0:
+    git: https://github.com/ncbi/ncbi-cxx-toolkit-public.git
+    branch: master
+    svn: https://anonsvn.ncbi.nlm.nih.gov/repos/v1/trunk/c++
+  26.0.0:
+    git: https://github.com/ncbi/ncbi-cxx-toolkit-public.git
+    branch: release/26-dev

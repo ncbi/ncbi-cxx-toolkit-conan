@@ -17,7 +17,6 @@ def _remove_readonly(fn, path, excinfo):
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
-    version = "0.3.0"
     license = "CC0-1.0"
     homepage = "https://ncbi.github.io/cxx-toolkit"
     url = "https://github.com/ncbi/ncbi-cxx-toolkit-conan.git"
@@ -25,13 +24,8 @@ class NcbiCxxToolkit(ConanFile):
     topics = ("NCBI", "C++", "Toolkit")
     settings = "os", "compiler", "build_type", "arch"
 
-    tk_git = "https://github.com/ncbi/ncbi-cxx-toolkit-public.git"
-    tk_svn = "https://anonsvn.ncbi.nlm.nih.gov/repos/v1/trunk/c++"
-    tk_url = ""
-
     tk_tmp_tree = ""
     tk_src_tree = ""
-    tk_public = True
     all_NCBI_requires = {}
 
     options = {
@@ -54,7 +48,7 @@ class NcbiCxxToolkit(ConanFile):
 #                Linux                  Macos               Windows
 #"BACKWARD":     ("backward-cpp/1.6",    "",                 ""),
 "BACKWARD":     (None,                  None,               None),
-"BerkeleyDB":   ("libdb/5.3.28",        "libdb/5.3.28",     "libdb/5.3.28"),
+"BerkeleyDB":   ("libdb/5.3.28",        "libdb/5.3.28",     None),
 #"Boost":        ("boost/1.76.0",        "boost/1.76.0",     "boost/1.76.0"),
 "BZ2":          ("bzip2/1.0.8",         "bzip2/1.0.8",      "bzip2/1.0.8"),
 "CASSANDRA":    ("cassandra-cpp-driver/2.15.3", None,       None),
@@ -83,8 +77,11 @@ class NcbiCxxToolkit(ConanFile):
     }
     generators = "cmake"
 
-
 #----------------------------------------------------------------------------
+    def set_version(self):
+        if self.version == None:
+            self.version = "0.0.0"
+
     def __del__(self):
         if os.path.isdir(self.tk_tmp_tree):
             print("Just a moment...")
@@ -126,35 +123,39 @@ class NcbiCxxToolkit(ConanFile):
             src_found = True;
         else:
             print("getting Toolkit sources...")
-            if self.tk_git != "":
-                print("from git: " + self.tk_git)
+            tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
+            tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
+            tk_branch = self.conan_data["sources"][self.version]["branch"] if "git" in self.conan_data["sources"][self.version].keys() else "master"
+            tk_svn = self.conan_data["sources"][self.version]["svn"] if "svn" in self.conan_data["sources"][self.version].keys() else ""
+
+            if tk_url != "":
+                print("from url: " + tk_url)
+                curdir = os.getcwd()
+                os.chdir(self.tk_tmp_tree)
+                tools.get(tk_url)
+                os.chdir(curdir)
+                src_found = True;
+
+            if not src_found and tk_git != "":
+                print("from git: " + tk_git + "/" + tk_branch)
                 try:
                     git = tools.Git(self.tk_tmp_tree)
-                    git.clone(self.tk_git)
+                    git.clone(tk_git, branch = tk_branch, args = "--single-branch", shallow = True)
                     src_found = True;
                 except Exception:
                     print("git failed")
 
-            if not src_found and self.tk_svn != "":
-                print("from svn: " + self.tk_svn)
+            if not src_found and tk_svn != "":
+                print("from svn: " + tk_svn)
                 try:
                     svn = tools.SVN(self.tk_tmp_tree)
-                    svn.checkout(self.tk_svn)
+                    svn.checkout(tk_svn)
                     src_found = True;
                 except Exception:
                     print("svn failed")
 
             if not src_found:
-                curdir = os.getcwd()
-                os.chdir(self.tk_tmp_tree)
-                if self.tk_url != "":
-                    print("from url: " + self.tk_url)
-                    tools.get(self.tk_url)
-                    ar = self.tk_url
-                    src_found = True;
-                else:
-                    raise ConanException("Failed to find the Toolkit sources")
-                os.chdir(curdir)
+                raise ConanException("Failed to find the Toolkit sources")
             self.tk_src_tree = "src"
 
 #----------------------------------------------------------------------------
@@ -186,6 +187,8 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def requirements(self):
+        if not self.version in self.conan_data["sources"].keys():
+            raise ConanException("Invalid Toolkit version requested. Available: " + ' '.join(self.conan_data["sources"].keys()))
         self.output.info("Analyzing requirements. Please wait...")
         curdir = os.getcwd()
         self._get_Source()
@@ -246,8 +249,10 @@ class NcbiCxxToolkit(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.configure(source_folder="src")
-#        cmake.build()
-        self.run('cmake --build . %s -j 2' % cmake.build_config)
+        if self.settings.os == "Windows":
+            self.run('cmake --build . %s -j 2' % cmake.build_config)
+        else:
+            cmake.build()
 
 #----------------------------------------------------------------------------
     def package(self):
