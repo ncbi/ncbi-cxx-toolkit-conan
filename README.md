@@ -33,8 +33,8 @@ Install the requirements and configure the projects
 
 NCBI C++ Toolkit versions:
 
-    - 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
-    - 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/release/26-dev)
+    - 0.0.0  - most recent source code from GitHub/master
+    - 26.0.0 - Toolkit release v26.0.0
 
 
 <a name="recipe_Conan"></a>
