@@ -22,7 +22,7 @@ Clone this repository and export the recipe into the local Conan cache:
 Reference the package in conanfile.txt of your project:
 
     [requires]
-    ncbi-cxx-toolkit-public/0.3.0
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:targets=xncbi
 
@@ -30,6 +30,11 @@ Install the requirements and configure the projects
 
     conan install . --build missing
     cmake .
+
+NCBI C++ Toolkit versions:
+
+    - 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
+    - 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/release/26-dev)
 
 
 <a name="recipe_Conan"></a>
@@ -77,7 +82,7 @@ What we know for sure is that we need *blastinput* library.
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
 
     [requires]
-    ncbi-cxx-toolkit-public/0.3.0
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:targets=blastinput
     [generators]
@@ -115,7 +120,7 @@ You can request desired options in conanfile.txt. For example, the following ins
 shared libraries and use static libraries of external packages:
 
     [requires]
-    ncbi-cxx-toolkit-public/0.3.0
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
@@ -182,11 +187,11 @@ To add code generation into a project, use *NCBI_generate_cpp* command. For exam
     project(conanapp CXX)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
-    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.asn)
-    add_executable(asn_demo asn_demo.cpp ${GEN_SOURCES} ${GEN_HEADRS})
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.asn)
+    add_executable(asn_demo asn_demo.cpp ${GEN_SOURCES} ${GEN_HEADERS})
     target_link_libraries(asn_demo xser)
 
-First two parameters to *NCBI_generate_cpp* receive a list of generated files - sources and headers. After that goes one or more data specifications. Files will be generated during the build in the directory where the specification is.
+First two parameters to *NCBI_generate_cpp* receive lists of generated files - sources and headers. After that goes one or more data specifications. Files will be generated during the build in the directory where the specification is.
 
 ### Protocol buffers and gRPC.
 
@@ -195,7 +200,7 @@ First two parameters to *NCBI_generate_cpp* receive a list of generated files - 
 First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/0.3.0
+    ncbi-cxx-toolkit-public/26.0.0
     protobuf/3.17.1
     grpc/1.38.0
 
@@ -205,12 +210,12 @@ Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate
     project(conanapp CXX)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
-    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.proto)
-    add_library(grpc_demo grpc_demo.cpp ${GEN_SOURCES} ${GEN_HEADRS})
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.proto)
+    add_library(grpc_demo grpc_demo.cpp ${GEN_SOURCES} ${GEN_HEADERS})
     
 By default, *NCBI_generate_cpp* generates *protocol buffers* files only. To instruct it to generate gRPC ones as well, use *GEN_OPTIONS* flags, like this:
 
-    NCBI_generate_cpp(GEN_SOURCES GEN_HEADRS sample.proto GEN_OPTIONS grpc)
+    NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.proto GEN_OPTIONS grpc)
 
 
 <a name="recipe_NCBIptb"></a>
