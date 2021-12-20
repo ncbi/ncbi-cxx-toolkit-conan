@@ -21,7 +21,9 @@ class NcbiCxxToolkit(ConanFile):
     homepage = "https://ncbi.github.io/cxx-toolkit"
     url = "https://github.com/ncbi/ncbi-cxx-toolkit-conan.git"
     description = "NCBI C++ Toolkit"
-    topics = ("NCBI", "C++", "Toolkit")
+    topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
+              "genome", "genetic", "sequence", "alignment", "blast",
+              "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
 
     tk_tmp_tree = ""
@@ -70,17 +72,26 @@ class NcbiCxxToolkit(ConanFile):
 "Z":            ("zlib/1.2.11",         "zlib/1.2.11",      "zlib/1.2.11"),
     }
     Conan_package_options = {
-        "libnghttp2": {"with_app": False, "with_hpack": False},
-        "grpc":       {"cpp_plugin": True, "csharp_plugin": False, "node_plugin": False,
-                       "objective_c_plugin": False, "php_plugin": False,
-                       "python_plugin": False, "ruby_plugin": False}
+        "libnghttp2": {
+            "with_app": False,
+            "with_hpack": False
+        },
+        "grpc": {
+            "cpp_plugin": True,
+            "csharp_plugin": False,
+            "node_plugin": False,
+            "objective_c_plugin": False,
+            "php_plugin": False,
+            "python_plugin": False,
+            "ruby_plugin": False
+        }
     }
     generators = "cmake"
 
 #----------------------------------------------------------------------------
     def set_version(self):
         if self.version == None:
-            self.version = "0.0.0"
+            self.version = "26.0.0"
 
     def __del__(self):
         if os.path.isdir(self.tk_tmp_tree):
@@ -132,7 +143,7 @@ class NcbiCxxToolkit(ConanFile):
                 print("from url: " + tk_url)
                 curdir = os.getcwd()
                 os.chdir(self.tk_tmp_tree)
-                tools.get(tk_url)
+                tools.get(tk_url, strip_root = True)
                 os.chdir(curdir)
                 src_found = True;
 
@@ -171,19 +182,20 @@ class NcbiCxxToolkit(ConanFile):
         return cmake
 
 #----------------------------------------------------------------------------
-#    def validate(self):
-#        if self.settings.compiler.get_safe("cppstd"):
-#            tools.check_min_cppstd(self, 17)
+    def validate(self):
+        tools.check_min_cppstd(self, 14)
+        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
+            raise ConanInvalidConfiguration("This operationg system is not supported")
+        if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
+        if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("This version of GCC is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
-            raise ConanException("This operationg system is not supported")
-        if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
-            raise ConanException("This version of Visual Studio is not supported")
+#    def configure(self):
 
 #----------------------------------------------------------------------------
     def requirements(self):
@@ -259,6 +271,9 @@ class NcbiCxxToolkit(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+    def imports(self):
+        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
+
 #----------------------------------------------------------------------------
     def package_info(self):
         allrequires = self.all_NCBI_requires
@@ -284,13 +299,6 @@ class NcbiCxxToolkit(ConanFile):
                     self.cpp_info.components[req].requires.append("openssl::openssl")
             else:
                 self.cpp_info.components[req].libs = []
-
-#        self.cpp_info.components["VDB"].libs = []
-#        self.cpp_info.components["Sybase"].libs = []
-#        self.cpp_info.components["MySQL"].libs = []
-#        self.cpp_info.components["ODBC"].libs = []
-#        self.cpp_info.components["wxWidgets"].libs = []
-#        self.cpp_info.components["FASTCGI"].libs = []
 
         allexports = {}
         impfile = self.package_folder + "/res/ncbi-cpp-toolkit.imports"

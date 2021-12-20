@@ -4,5 +4,7 @@ sources:
     branch: master
     svn: https://anonsvn.ncbi.nlm.nih.gov/repos/v1/trunk/c++
   26.0.0:
+    url: https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-26.0.0.tar.gz
+    sha256: "e0db8f3cd1bfaf1e235b3ada8d6d40c72961c5fe20d09bc7321ff8a2667d046c"
     git: https://github.com/ncbi/ncbi-cxx-toolkit-public.git
     branch: release/26-dev
