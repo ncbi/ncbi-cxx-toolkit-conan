@@ -1293,6 +1293,9 @@ class NcbiCxxToolkit(ConanFile):
             if "general" in allexports:
                 self.cpp_info.components["libgeneral"].libs = ["$<1:general>"]
                 self.cpp_info.components["libgeneral"].requires = ["xser"]
+            if "generalasn" in allexports:
+                self.cpp_info.components["libgeneral"].libs = ["generalasn"]
+                self.cpp_info.components["libgeneral"].requires = ["xser"]
             if "genesbyloc" in allexports:
                 self.cpp_info.components["genesbyloc"].libs = ["genesbyloc"]
                 self.cpp_info.components["genesbyloc"].requires = ["xser"]
