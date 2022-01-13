@@ -25,6 +25,7 @@ class NcbiCxxToolkit(ConanFile):
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake"
 
     tk_tmp_tree = ""
     tk_src_tree = ""
@@ -43,33 +44,32 @@ class NcbiCxxToolkit(ConanFile):
         "sharedDeps": False,
         "fPIC":       True,
         "projects":   "",
-        "targets":    "xncbi",
+        "targets":    "",
         "tags":       ""
     }
     NCBI_to_Conan_requires = {
-#                Linux                  Macos               Windows
-#"BACKWARD":     ("backward-cpp/1.6",    "",                 ""),
-"BACKWARD":     (None,                  None,               None),
-"BerkeleyDB":   ("libdb/5.3.28",        "libdb/5.3.28",     None),
-#"Boost":        ("boost/1.76.0",        "boost/1.76.0",     "boost/1.76.0"),
-"BZ2":          ("bzip2/1.0.8",         "bzip2/1.0.8",      "bzip2/1.0.8"),
-"CASSANDRA":    ("cassandra-cpp-driver/2.15.3", None,       None),
-"GIF":          ("giflib/5.2.1",        "giflib/5.2.1",     "giflib/5.2.1"),
-"GRPC":         ("grpc/1.39.1",         "grpc/1.39.1",      "grpc/1.39.1"),
-"JPEG":         ("libjpeg/9d",          "libjpeg/9d",       "libjpeg/9d"),
-"LMDB":         ("lmdb/0.9.29",         "lmdb/0.9.29",      "lmdb/0.9.29"),
-"LZO":          ("lzo/2.10",            "lzo/2.10",         "lzo/2.10"),
-"MySQL":        ("libmysqlclient/8.0.25", "libmysqlclient/8.0.25", "libmysqlclient/8.0.25"),
-"NGHTTP2":      ("libnghttp2/1.45.1",   "libnghttp2/1.45.1","libnghttp2/1.45.1"),
-"PCRE":         ("pcre/8.45",           "pcre/8.45",        "pcre/8.45"),
-"PNG":          ("libpng/1.6.37",       "libpng/1.6.37",    "libpng/1.6.37"),
-"PROTOBUF":     ("protobuf/3.17.1",     "protobuf/3.17.1",  "protobuf/3.17.1"),
-"SQLITE3":      ("sqlite3/3.36.0",      "sqlite3/3.36.0",   "sqlite3/3.36.0"),
-"TIFF":         ("libtiff/4.3.0",       "libtiff/4.3.0",    "libtiff/4.3.0"),
-"XML":          ("libxml2/2.9.12",      "libxml2/2.9.12",   "libxml2/2.9.12"),
-"XSLT":         ("libxslt/1.1.34",      "libxslt/1.1.34",   "libxslt/1.1.34"),
-"UV":           ("libuv/1.42.0",        "libuv/1.42.0",     "libuv/1.42.0"),
-"Z":            ("zlib/1.2.11",         "zlib/1.2.11",      "zlib/1.2.11"),
+#"BACKWARD":     "backward-cpp/1.6"
+        "BACKWARD":     None,
+        "BerkeleyDB":   "libdb/5.3.28@#355aa134e9ee1bda60fa224f8b54c913",
+#"Boost":        "boost/1.76.0"
+        "BZ2":          "bzip2/1.0.8@#493645787acdd3909523a6a2773b1b36",
+        "CASSANDRA":    "cassandra-cpp-driver/2.15.3@#27c46dd9dfbb2a3afef30aa2e914f00a",
+        "GIF":          "giflib/5.2.1@#75a273d91a6c63bc0d8a93799ce19acc",
+        "GRPC":         "grpc/1.39.1@#9f7bb930dc09f8ca1a8bcc870d037f8f",
+        "JPEG":         "libjpeg/9d@#956b5e73632aac77088571f574d766c0",
+        "LMDB":         "lmdb/0.9.29@#3bdb51ff4c3649bd865ee3857f0f2e07",
+        "LZO":          "lzo/2.10@#76a80652793ae478a12f6f9a8eb17a89",
+        "MySQL":        "libmysqlclient/8.0.25@#bbe62517865849c442c032cc7aecfd57",
+        "NGHTTP2":      "libnghttp2/1.45.1@#cef166f78349143079e1c667d823b25a",
+        "PCRE":         "pcre/8.45@#b6bae758d36ca2050bb8527ea408eb75",
+        "PNG":          "libpng/1.6.37@#8b23717a9884a2b06884c599072955f4",
+        "PROTOBUF":     "protobuf/3.17.1@#8aaa20a95bb223cedc99111f9072cd76",
+        "SQLITE3":      "sqlite3/3.36.0@#567836d4f4b7b58a4e834bf98288d609",
+        "TIFF":         "libtiff/4.3.0@#28ac662980826ae8ffe8d6236cdd9735",
+        "XML":          "libxml2/2.9.12@#9817dd585ffc6de1479da6d5bcf01fc0",
+        "XSLT":         "libxslt/1.1.34@#47946f5c7abe03d18179b55be67bbabe",
+        "UV":           "libuv/1.42.0@#e1801aae9570062012d94db20338451b",
+        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9"
     }
     Conan_package_options = {
         "libnghttp2": {
@@ -86,7 +86,6 @@ class NcbiCxxToolkit(ConanFile):
             "ruby_plugin": False
         }
     }
-    generators = "cmake"
 
 #----------------------------------------------------------------------------
     def set_version(self):
@@ -113,21 +112,25 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def _translate_ReqKey(self, key):
-        index = 0
-        if self.settings.os == "Linux":
-            index = 0
-        elif self.settings.os == "Macos":
-            index = 1
-        elif self.settings.os == "Windows":
-            index = 2
-        if key in self.NCBI_to_Conan_requires.keys() and self.NCBI_to_Conan_requires[key][index]:
-            return self.NCBI_to_Conan_requires[key][index]
+        if key in self.NCBI_to_Conan_requires.keys():
+#ATTENTION
+            if key == "BerkeleyDB" and self.settings.os == "Windows":
+                return None
+            if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
+                return None
+#            if key == "NGHTTP2" and self.settings.os == "Windows":
+#                return None
+            return self.NCBI_to_Conan_requires[key]
         return None
 
 #----------------------------------------------------------------------------
+    @property
+    def _src(self):
+        return "src"
+
     def _get_Source(self):
         self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
-        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", "src"))
+        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", self._src))
         src_found = False;
         if os.path.isdir(src):
             self.tk_src_tree = src
@@ -167,7 +170,7 @@ class NcbiCxxToolkit(ConanFile):
 
             if not src_found:
                 raise ConanException("Failed to find the Toolkit sources")
-            self.tk_src_tree = "src"
+            self.tk_src_tree = self._src
 
 #----------------------------------------------------------------------------
     def _configure_cmake(self):
@@ -222,26 +225,27 @@ class NcbiCxxToolkit(ConanFile):
                 if pkg is not None:
                     print("Package requires ", pkg)
                     self.requires(pkg)
+                    pkg = pkg[:pkg.find("/")]
 #ATTENTION
                     if req == "MySQL":
-                        self.requires("openssl/1.1.1l")
-                    pkg = pkg[:pkg.find("/")]
+                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
+                    if req == "CASSANDRA":
+                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
+                    if req == "TIFF":
+                        self.requires("zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207")
                     if not pkg == "grpc":
                         self.options[pkg].shared = self.options.sharedDeps
-                    if pkg in self.Conan_package_options.keys():
-#ATTENTION
-#TODO: automate this somehow (use Conan_package_options)
-                        if pkg == "libnghttp2":
-                            self.options[pkg].with_app = False
-                            self.options[pkg].with_hpack = False
-                        if pkg == "grpc":
-                            self.options[pkg].cpp_plugin = True
-                            self.options[pkg].csharp_plugin = False
-                            self.options[pkg].node_plugin = False
-                            self.options[pkg].objective_c_plugin = False
-                            self.options[pkg].php_plugin = False
-                            self.options[pkg].python_plugin = False
-                            self.options[pkg].ruby_plugin = False
+                    if pkg == "libnghttp2":
+                        self.options[pkg].with_app = False
+                        self.options[pkg].with_hpack = False
+                    if pkg == "grpc":
+                        self.options[pkg].cpp_plugin = True
+                        self.options[pkg].csharp_plugin = False
+                        self.options[pkg].node_plugin = False
+                        self.options[pkg].objective_c_plugin = False
+                        self.options[pkg].php_plugin = False
+                        self.options[pkg].python_plugin = False
+                        self.options[pkg].ruby_plugin = False
             os.remove(reqfile)
         os.chdir(curdir)
 
@@ -250,7 +254,7 @@ class NcbiCxxToolkit(ConanFile):
         if self.tk_tmp_tree == "":
             self._get_Source()
         shutil.move(os.path.join(self.tk_tmp_tree, "include"), ".")
-        shutil.move(os.path.join(self.tk_tmp_tree, "src"), ".")
+        shutil.move(os.path.join(self.tk_tmp_tree, self._src), ".")
         if os.path.isdir(os.path.join(self.tk_tmp_tree, "scripts")):
             shutil.move(os.path.join(self.tk_tmp_tree, "scripts"), ".")
         if os.path.isdir(os.path.join(self.tk_tmp_tree, "doc")):
@@ -260,9 +264,9 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def build(self):
         cmake = self._configure_cmake()
-        cmake.configure(source_folder="src")
+        cmake.configure(source_folder=self._src)
         if self.settings.os == "Windows":
-            self.run('cmake --build . %s -j 2' % cmake.build_config)
+            self.run('cmake --build . %s -j 1' % cmake.build_config)
         else:
             cmake.build()
 
@@ -297,6 +301,10 @@ class NcbiCxxToolkit(ConanFile):
 #ATTENTION
                 if req == "MySQL":
                     self.cpp_info.components[req].requires.append("openssl::openssl")
+                if req == "CASSANDRA":
+                    self.cpp_info.components[req].requires.append("openssl::openssl")
+                if req == "TIFF":
+                    self.cpp_info.components[req].requires.append("zstd::zstd")
             else:
                 self.cpp_info.components[req].libs = []
 
