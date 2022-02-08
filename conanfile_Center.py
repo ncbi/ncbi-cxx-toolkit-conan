@@ -19,13 +19,13 @@ class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
     license = "CC0-1.0"
     homepage = "https://ncbi.github.io/cxx-toolkit"
-    url = "https://github.com/ncbi/ncbi-cxx-toolkit-conan.git"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "NCBI C++ Toolkit"
     topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
 
     tk_tmp_tree = ""
     tk_src_tree = ""
@@ -33,29 +33,21 @@ class NcbiCxxToolkit(ConanFile):
 
     options = {
         "shared":     [True, False],
-        "sharedDeps": [True, False],
         "fPIC":       [True, False],
-        "with_projects": "ANY",
-        "with_targets":  "ANY",
-        "with_tags":     "ANY"
+        "projects":   "ANY",
+        "targets":    "ANY"
     }
     default_options = {
         "shared":     False,
-        "sharedDeps": False,
         "fPIC":       True,
-        "with_projects":  "",
-        "with_targets":   "",
-        "with_tags":      ""
+        "projects":   "",
+        "targets":    "",
     }
     NCBI_to_Conan_requires = {
-#"BACKWARD":     "backward-cpp/1.6"
-        "BACKWARD":     None,
         "BerkeleyDB":   "libdb/5.3.28@#355aa134e9ee1bda60fa224f8b54c913",
-#"Boost":        "boost/1.76.0"
         "BZ2":          "bzip2/1.0.8@#493645787acdd3909523a6a2773b1b36",
         "CASSANDRA":    "cassandra-cpp-driver/2.15.3@#27c46dd9dfbb2a3afef30aa2e914f00a",
         "GIF":          "giflib/5.2.1@#75a273d91a6c63bc0d8a93799ce19acc",
-        "GRPC":         "grpc/1.39.1@#9f7bb930dc09f8ca1a8bcc870d037f8f",
         "JPEG":         "libjpeg/9d@#956b5e73632aac77088571f574d766c0",
         "LMDB":         "lmdb/0.9.29@#3bdb51ff4c3649bd865ee3857f0f2e07",
         "LZO":          "lzo/2.10@#76a80652793ae478a12f6f9a8eb17a89",
@@ -63,38 +55,15 @@ class NcbiCxxToolkit(ConanFile):
         "NGHTTP2":      "libnghttp2/1.45.1@#cef166f78349143079e1c667d823b25a",
         "PCRE":         "pcre/8.45@#b6bae758d36ca2050bb8527ea408eb75",
         "PNG":          "libpng/1.6.37@#8b23717a9884a2b06884c599072955f4",
-        "PROTOBUF":     "protobuf/3.17.1@#8aaa20a95bb223cedc99111f9072cd76",
         "SQLITE3":      "sqlite3/3.36.0@#567836d4f4b7b58a4e834bf98288d609",
         "TIFF":         "libtiff/4.3.0@#28ac662980826ae8ffe8d6236cdd9735",
         "XML":          "libxml2/2.9.12@#9817dd585ffc6de1479da6d5bcf01fc0",
         "XSLT":         "libxslt/1.1.34@#47946f5c7abe03d18179b55be67bbabe",
         "UV":           "libuv/1.42.0@#e1801aae9570062012d94db20338451b",
-        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9",
-
-        "OpenSSL":      "openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe",
-        "ZSTD":         "zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207"
-    }
-    Conan_package_options = {
-        "libnghttp2": {
-            "with_app": False,
-            "with_hpack": False
-        },
-        "grpc": {
-            "cpp_plugin": True,
-            "csharp_plugin": False,
-            "node_plugin": False,
-            "objective_c_plugin": False,
-            "php_plugin": False,
-            "python_plugin": False,
-            "ruby_plugin": False
-        }
+        "Z":            "zlib/1.2.11@#683857dbd5377d65f26795d4023858f9"
     }
 
 #----------------------------------------------------------------------------
-    def set_version(self):
-        if self.version == None:
-            self.version = "26.0.0"
-
     def __del__(self):
         if os.path.isdir(self.tk_tmp_tree):
             print("Just a moment...")
@@ -121,91 +90,56 @@ class NcbiCxxToolkit(ConanFile):
                 return None
             if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
                 return None
-#            if key == "NGHTTP2" and self.settings.os == "Windows":
-#                return None
+            if key == "NGHTTP2" and self.settings.os == "Windows":
+                return None
             return self.NCBI_to_Conan_requires[key]
         return None
 
 #----------------------------------------------------------------------------
     @property
-    def _source_subfolder(self):
+    def _src(self):
         return "src"
 
     def _get_Source(self):
         self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
-        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", self._source_subfolder))
+        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", self._src))
         src_found = False;
         if os.path.isdir(src):
             self.tk_src_tree = src
             src_found = True;
         else:
+            tk_url = self.conan_data["sources"][self.version]["url"]
             print("getting Toolkit sources...")
-            tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
-            tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
-            tk_branch = self.conan_data["sources"][self.version]["branch"] if "git" in self.conan_data["sources"][self.version].keys() else "master"
-            tk_svn = self.conan_data["sources"][self.version]["svn"] if "svn" in self.conan_data["sources"][self.version].keys() else ""
-
-            if tk_url != "":
-                print("from url: " + tk_url)
-                curdir = os.getcwd()
-                os.chdir(self.tk_tmp_tree)
-                tools.get(tk_url, strip_root = True)
-                os.chdir(curdir)
-                src_found = True;
-
-            if not src_found and tk_git != "":
-                print("from git: " + tk_git + "/" + tk_branch)
-                try:
-                    git = tools.Git(self.tk_tmp_tree)
-                    git.clone(tk_git, branch = tk_branch, args = "--single-branch", shallow = True)
-                    src_found = True;
-                except Exception:
-                    print("git failed")
-
-            if not src_found and tk_svn != "":
-                print("from svn: " + tk_svn)
-                try:
-                    svn = tools.SVN(self.tk_tmp_tree)
-                    svn.checkout(tk_svn)
-                    src_found = True;
-                except Exception:
-                    print("svn failed")
-
-            if not src_found:
-                raise ConanException("Failed to find the Toolkit sources")
-            self.tk_src_tree = self._source_subfolder
+            print("from url: " + tk_url)
+            curdir = os.getcwd()
+            os.chdir(self.tk_tmp_tree)
+            tools.get(**self.conan_data["sources"][self.version], strip_root = True)
+            os.chdir(curdir)
+            src_found = True;
+            self.tk_src_tree = self._src
 
 #----------------------------------------------------------------------------
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
-        if self.options.with_projects != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.with_projects
-        if self.options.with_targets != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        if self.options.with_tags != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TAGS"] = self.options.with_tags
+        if self.options.projects != "":
+            cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.projects
+        if self.options.targets != "":
+            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.targets
         return cmake
 
 #----------------------------------------------------------------------------
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+        tools.check_min_cppstd(self, 17)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:   
-            raise ConanInvalidConfiguration("This operating system is not supported")
+            raise ConanInvalidConfiguration("This operationg system is not supported")
         if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("This configuration is not supported")
         if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
 #----------------------------------------------------------------------------
@@ -221,9 +155,8 @@ class NcbiCxxToolkit(ConanFile):
             "-DNCBI_PTBCFG_COLLECT_REQUIRES=ON",
             "-DNCBI_PTBCFG_COLLECT_REQUIRES_FILE=req",
             "-DBUILD_SHARED_LIBS='%s'" % shared,
-            "-DNCBI_PTBCFG_PROJECT_TARGETS='%s'" % self.options.with_targets,
-            "-DNCBI_PTBCFG_PROJECT_LIST='%s'" % self.options.with_projects,
-            "-DNCBI_PTBCFG_PROJECT_TAGS='%s'" % self.options.with_tags],
+            "-DNCBI_PTBCFG_PROJECT_TARGETS='%s'" % self.options.targets,
+            "-DNCBI_PTBCFG_PROJECT_LIST='%s'" % self.options.projects],
             stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
         reqfile = os.path.join(self.tk_src_tree, "..", "req")
         if os.path.isfile(reqfile):
@@ -236,24 +169,11 @@ class NcbiCxxToolkit(ConanFile):
                     pkg = pkg[:pkg.find("/")]
 #ATTENTION
                     if req == "MySQL":
-                        self.requires(self._translate_ReqKey("OpenSSL"))
+                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
                     if req == "CASSANDRA":
-                        self.requires(self._translate_ReqKey("OpenSSL"))
+                        self.requires("openssl/1.1.1l@#98215f1d057178dfd8c867950e16a0fe")
                     if req == "TIFF":
-                        self.requires(self._translate_ReqKey("ZSTD"))
-                    if not pkg == "grpc":
-                        self.options[pkg].shared = self.options.sharedDeps
-                    if pkg == "libnghttp2":
-                        self.options[pkg].with_app = False
-                        self.options[pkg].with_hpack = False
-                    if pkg == "grpc":
-                        self.options[pkg].cpp_plugin = True
-                        self.options[pkg].csharp_plugin = False
-                        self.options[pkg].node_plugin = False
-                        self.options[pkg].objective_c_plugin = False
-                        self.options[pkg].php_plugin = False
-                        self.options[pkg].python_plugin = False
-                        self.options[pkg].ruby_plugin = False
+                        self.requires("zstd/1.5.0@#2797bc9a304b2c45e2239c0d4ad15207")
             os.remove(reqfile)
         os.chdir(curdir)
 
@@ -262,7 +182,7 @@ class NcbiCxxToolkit(ConanFile):
         if self.tk_tmp_tree == "":
             self._get_Source()
         shutil.move(os.path.join(self.tk_tmp_tree, "include"), ".")
-        shutil.move(os.path.join(self.tk_tmp_tree, self._source_subfolder), ".")
+        shutil.move(os.path.join(self.tk_tmp_tree, self._src), ".")
         if os.path.isdir(os.path.join(self.tk_tmp_tree, "scripts")):
             shutil.move(os.path.join(self.tk_tmp_tree, "scripts"), ".")
         if os.path.isdir(os.path.join(self.tk_tmp_tree, "doc")):
@@ -272,9 +192,8 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def build(self):
         cmake = self._configure_cmake()
-        cmake.configure(source_folder=self._source_subfolder)
-# Visual Studio sometimes runs "out of heap space"
-        if self.settings.compiler == "Visual Studio":
+        cmake.configure(source_folder=self._src)
+        if self.settings.os == "Windows":
             self.run('cmake --build . %s -j 1' % cmake.build_config)
         else:
             cmake.build()
@@ -284,8 +203,8 @@ class NcbiCxxToolkit(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-#    def imports(self):
-#        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
+    def imports(self):
+        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
 
 #----------------------------------------------------------------------------
     def package_info(self):
@@ -318,7 +237,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components[req].libs = []
 
         allexports = {}
-        impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
+        impfile = self.package_folder + "/res/ncbi-cpp-toolkit.imports"
         if os.path.isfile(impfile):
             allexports = set(open(impfile).read().split())
 
@@ -1582,7 +1501,7 @@ class NcbiCxxToolkit(ConanFile):
                 self.cpp_info.components["test_dll"].requires = ["ORIGLIBS"]
             if "xncbi" in allexports:
                 self.cpp_info.components["xncbi"].libs = ["xncbi"]
-                self.cpp_info.components["xncbi"].requires = ["BACKWARD", "ORIGLIBS"]
+                self.cpp_info.components["xncbi"].requires = ["ORIGLIBS"]
 #----------------------------------------------------------------------------
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].defines.append("_UNICODE")

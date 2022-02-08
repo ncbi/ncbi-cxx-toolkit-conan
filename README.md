@@ -24,7 +24,7 @@ Reference the package in conanfile.txt of your project:
     [requires]
     ncbi-cxx-toolkit-public/26.0.0
     [options]
-    ncbi-cxx-toolkit-public:targets=xncbi
+    ncbi-cxx-toolkit-public:with_targets=xncbi
 
 Install the requirements and configure the projects
 
@@ -84,7 +84,7 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*
     [requires]
     ncbi-cxx-toolkit-public/26.0.0
     [options]
-    ncbi-cxx-toolkit-public:targets=blastinput
+    ncbi-cxx-toolkit-public:with_targets=blastinput
     [generators]
     cmake
 
@@ -122,7 +122,7 @@ shared libraries and use static libraries of external packages:
     [requires]
     ncbi-cxx-toolkit-public/26.0.0
     [options]
-    ncbi-cxx-toolkit-public:targets=blastinput
+    ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
     ncbi-cxx-toolkit-public:sharedDeps=False
     [generators]
@@ -153,13 +153,13 @@ recommended that you specify what exactly you need in options section of conanfi
 several libraries here using semicolon separator:
 
     [options]
-    ncbi-cxx-toolkit-public:targets=blastinput;xncbi;xser
+    ncbi-cxx-toolkit-public:with_targets=blastinput;xncbi;xser
 
 
 You do not need to know all the dependencies. They will be collected automatically. For example, in case of *blastinput* 
 library Conan will build and use 58 ones.
 
-*CONAN_LIBS* macro collects all libraries into one blob. That is, if you do not specify *ncbi-cxx-toolkit-public:targets*, 
+*CONAN_LIBS* macro collects all libraries into one blob. That is, if you do not specify *ncbi-cxx-toolkit-public:with_targets*, 
 all 250 toolkit libraries, as well as all external ones will be in that blob. This might work. The linker will figure out 
 what exactly it needs, but it definitely will be overwhelmed. Also, it takes more time to build libraries which you do not really need.
 
@@ -172,7 +172,7 @@ Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to r
     add_executable(blast_demo blast_demo.cpp)
     target_link_libraries(blast_demo blastinput)
 
-This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
+This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:with_targets* setting in conanfile.txt configuration file. Yes, *CONAN_LIBS* macro will include all the libraries, but you do not use it any longer. Also, once the Toolkit installation contains all libraries, it is possible to reuse it in different projects. When you do not know exactly what does your project require, you can add libraries into the *target_link_libraries* command one by one.
 
 
 <a name="recipe_Serial"></a>
