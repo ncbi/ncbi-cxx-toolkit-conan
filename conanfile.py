@@ -26,6 +26,7 @@ class NcbiCxxToolkit(ConanFile):
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
+    short_paths = True
 
     tk_tmp_tree = ""
     tk_src_tree = ""
