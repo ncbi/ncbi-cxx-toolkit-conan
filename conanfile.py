@@ -26,7 +26,7 @@ class NcbiCxxToolkit(ConanFile):
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-    short_paths = True
+    short_paths = False
 
     tk_tmp_tree = ""
     tk_src_tree = ""
@@ -122,8 +122,6 @@ class NcbiCxxToolkit(ConanFile):
                 return None
             if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
                 return None
-#            if key == "NGHTTP2" and self.settings.os == "Windows":
-#                return None
             return self.NCBI_to_Conan_requires[key]
         return None
 
@@ -131,6 +129,11 @@ class NcbiCxxToolkit(ConanFile):
     @property
     def _source_subfolder(self):
         return "src"
+
+    @property
+    def _build_subfolder(self):
+#ATTENTION: v26 does not support "build_subfolder"
+        return "b" if self.version == "0.0.0" else "."
 
     def _get_Source(self):
         self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
@@ -174,7 +177,7 @@ class NcbiCxxToolkit(ConanFile):
 
             if not src_found:
                 raise ConanException("Failed to find the Toolkit sources")
-            self.tk_src_tree = self._source_subfolder
+            self.tk_src_tree = os.path.join(self.tk_tmp_tree, self._source_subfolder)
 
 #----------------------------------------------------------------------------
     def _configure_cmake(self):
@@ -273,9 +276,10 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def build(self):
         cmake = self._configure_cmake()
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(source_folder=self._source_subfolder, build_folder = self._build_subfolder)
 # Visual Studio sometimes runs "out of heap space"
         if self.settings.compiler == "Visual Studio":
+            os.chdir(self._build_subfolder)
             self.run('cmake --build . %s -j 1' % cmake.build_config)
         else:
             cmake.build()
@@ -283,7 +287,7 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def package(self):
         cmake = self._configure_cmake()
-        cmake.install()
+        cmake.install(build_dir = self._build_subfolder)
 
 #    def imports(self):
 #        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
