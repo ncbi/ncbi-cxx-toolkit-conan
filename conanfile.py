@@ -183,6 +183,8 @@ class NcbiCxxToolkit(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
+        if self.options.shared:
+            cmake.definitions["NCBI_PTBCFG_ALLOW_COMPOSITE"] = "TRUE"
         if self.options.with_projects != "":
             cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.with_projects
         if self.options.with_targets != "":
@@ -279,10 +281,8 @@ class NcbiCxxToolkit(ConanFile):
         cmake.configure(source_folder=self._source_subfolder, build_folder = self._build_subfolder)
 # Visual Studio sometimes runs "out of heap space"
         if self.settings.compiler == "Visual Studio":
-            os.chdir(self._build_subfolder)
-            self.run('cmake --build . %s -j 1' % cmake.build_config)
-        else:
-            cmake.build()
+            cmake.parallel = False
+        cmake.build()
 
 #----------------------------------------------------------------------------
     def package(self):
@@ -328,7 +328,8 @@ class NcbiCxxToolkit(ConanFile):
             allexports = set(open(impfile).read().split())
 
 #============================================================================
-        if self.settings.os == "Windows" and self.options.shared:
+#        if self.settings.os == "Windows" and self.options.shared:
+        if self.options.shared:
 #12--------------------------------------------------------------------------
             if "blast_app_util" in allexports:
                 self.cpp_info.components["blast_app_util"].libs = ["blast_app_util"]
