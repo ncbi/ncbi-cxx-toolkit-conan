@@ -91,8 +91,8 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*
 
 and *CMakeLists.txt*:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
     add_executable(blast_demo blast_demo.cpp)
@@ -165,8 +165,8 @@ what exactly it needs, but it definitely will be overwhelmed. Also, it takes mor
 
 Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to reference *blastinput* directly. Change your CMakeLists.txt to look as follows:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
     add_executable(blast_demo blast_demo.cpp)
@@ -183,8 +183,8 @@ This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:wi
 The Toolkit contains [datatool](https://ncbi.github.io/cxx-toolkit/pages/ch_app.html#ch_app.datatool) application, which can generate C++ data storage classes from ASN.1, DTD, XML schema or JSON schema specification. These classes can then be used to [read and write data](https://ncbi.github.io/cxx-toolkit/pages/ch_ser) in ASN.1, XML or JSON format.
 To add code generation into a project, use *NCBI_generate_cpp* command. For example:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
     NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.asn)
@@ -206,8 +206,8 @@ First, make sure your project contains proper requirements. For example, conanfi
 
 Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate_cpp*:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
     NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.proto)
@@ -225,8 +225,8 @@ NCBI C++ Toolkit includes [NCBIptb](https://ncbi.github.io/cxx-toolkit/pages/ch_
 
 For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as well look like the following:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 
@@ -247,8 +247,8 @@ All header files are then expected to be in *include* and its subdirectories; so
 
 In other words, your root *CMakeLists.txt* should look like this:
 
-    cmake_minimum_required(VERSION 3.7)
-    project(conanapp CXX)
+    cmake_minimum_required(VERSION 3.9)
+    project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
     NCBI_add_subdirectory(src)
