@@ -13,7 +13,7 @@
 <a name="recipe_Start"></a>
 ## Quick start.
 
-For the Toolkit recipe, it is possible to use either [https://conan.io/center/ncbi-cxx-toolkit-public](JFrog ConanCenter) or this repository.
+For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
 To use ConanCenter recipe, skip this "conan export" step.
 Otherwise clone this repository and export the recipe into the local Conan cache:
 
