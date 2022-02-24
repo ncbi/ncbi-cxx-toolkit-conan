@@ -13,7 +13,9 @@
 <a name="recipe_Start"></a>
 ## Quick start.
 
-Clone this repository and export the recipe into the local Conan cache:
+For the Toolkit recipe, it is possible to use either [https://conan.io/center/ncbi-cxx-toolkit-public](JFrog ConanCenter) or this repository.
+To use ConanCenter recipe, skip this "conan export" step.
+Otherwise clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan
     cd ncbi-cxx-toolkit-conan
@@ -22,7 +24,7 @@ Clone this repository and export the recipe into the local Conan cache:
 Reference the package in conanfile.txt of your project:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.0
+    ncbi-cxx-toolkit-public/26.0.1
     [options]
     ncbi-cxx-toolkit-public:with_targets=xncbi
 
@@ -34,7 +36,8 @@ Install the requirements and configure the projects
 NCBI C++ Toolkit versions:
 
 - 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
-- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/release/26-dev)
+- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
+- 26.0.1 - Toolkit release [v26.0.1](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
 
 
 <a name="recipe_Conan"></a>
@@ -82,7 +85,7 @@ What we know for sure is that we need *blastinput* library.
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.0
+    ncbi-cxx-toolkit-public/26.0.1
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     [generators]
@@ -120,7 +123,7 @@ You can request desired options in conanfile.txt. For example, the following ins
 shared libraries and use static libraries of external packages:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.0
+    ncbi-cxx-toolkit-public/26.0.1
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
@@ -200,7 +203,7 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.0
+    ncbi-cxx-toolkit-public/26.0.1
     protobuf/3.17.1
     grpc/1.38.0
 
