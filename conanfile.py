@@ -20,7 +20,7 @@ class NcbiCxxToolkit(ConanFile):
     license = "CC0-1.0"
     homepage = "https://ncbi.github.io/cxx-toolkit"
     url = "https://github.com/ncbi/ncbi-cxx-toolkit-conan.git"
-    description = "NCBI C++ Toolkit"
+    description = "NCBI C++ Toolkit -- a cross-platform application framework and a collection of libraries for working with biological data."
     topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
@@ -122,6 +122,8 @@ class NcbiCxxToolkit(ConanFile):
                 return None
             if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
                 return None
+            if key == "MySQL" and self.settings.os == "Macos" and "arm" in self.settings.arch:
+                return None
             return self.NCBI_to_Conan_requires[key]
         return None
 
@@ -133,7 +135,7 @@ class NcbiCxxToolkit(ConanFile):
     @property
     def _build_subfolder(self):
 #ATTENTION: v26 does not support "build_subfolder"
-        return "b" if self.version == "0.0.0" else "."
+        return "b" if tools.Version(self.version).major != "26" else "."
 
     def _get_Source(self):
         self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
@@ -199,11 +201,11 @@ class NcbiCxxToolkit(ConanFile):
             tools.check_min_cppstd(self, 14)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:   
             raise ConanInvalidConfiguration("This operating system is not supported")
-        if self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) < "15":
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and str(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
 
     def config_options(self):
