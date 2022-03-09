@@ -1,43 +1,14 @@
 # NCBI C++ Toolkit package recipe
 
-1. [Quick start.](#recipe_Start)
-2. [What is Conan and why you might need it?](#recipe_Conan)
-3. [Preparing work environment.](#recipe_Env)
-4. [Building your project.](#recipe_Build)
-5. [Define build options.](#recipe_Options)
-6. [Supported 3rd party packages.](#recipe_Other)
-7. [There are few things to note.](#recipe_Notes)
-8. [Data serialization support.](#recipe_Serial)
-9. [NCBIptb build process management.](#recipe_NCBIptb)
-
-<a name="recipe_Start"></a>
-## Quick start.
-
-For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
-To use ConanCenter recipe, skip this "conan export" step.
-Otherwise clone this repository and export the recipe into the local Conan cache:
-
-    git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan
-    cd ncbi-cxx-toolkit-conan
-    conan export .
-
-Reference the package in conanfile.txt of your project:
-
-    [requires]
-    ncbi-cxx-toolkit-public/26.0.1
-    [options]
-    ncbi-cxx-toolkit-public:with_targets=xncbi
-
-Install the requirements and configure the projects
-
-    conan install . --build missing
-    cmake .
-
-NCBI C++ Toolkit versions:
-
-- 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
-- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
-- 26.0.1 - Toolkit release [v26.0.1](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
+1. [What is Conan and why you might need it?](#recipe_Conan)
+2. [Preparing work environment.](#recipe_Env)
+3. [Building your project.](#recipe_Build)
+4. [Define build options.](#recipe_Options)
+5. [Supported 3rd party packages.](#recipe_Other)
+6. [There are few things to note.](#recipe_Notes)
+7. [Data serialization support.](#recipe_Serial)
+8. [NCBIptb build process management.](#recipe_NCBIptb)
+9. [Recap.](#recipe_Recap)
 
 
 <a name="recipe_Conan"></a>
@@ -266,6 +237,34 @@ In case of data serialization projects, you should follow the standard *NCBIptb*
     NCBI_end_lib()
 
 
+
+<a name="recipe_Recap"></a>
+## Recap.
+
+For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
+To use ConanCenter recipe, skip this "conan export" step.
+Otherwise clone this repository and export the recipe into the local Conan cache:
+
+    git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan
+    cd ncbi-cxx-toolkit-conan
+    conan export .
+
+Reference the package in conanfile.txt of your project:
+
+    [requires]
+    ncbi-cxx-toolkit-public/26.0.1
+    [options]
+    ncbi-cxx-toolkit-public:with_targets=xncbi
+
+Install the requirements and configure the projects
+
+    conan install . --build missing
+    cmake .
+
+NCBI C++ Toolkit versions:
+
+- 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
+- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
 
 
 
