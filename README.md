@@ -31,15 +31,20 @@ then the Toolkit itself. It is not always clear what exactly is required. Conan'
 <a name="recipe_Env"></a>
 ## Preparing work environment.
 
-First, you need Conan. For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html).
+First, you need Conan. For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html). Note that Conan evolves, recipes change. As of March 2022, you need at least version 1.43. If needed, upgrade Conan installation:
 
-Next, you need to add conan-center remote repository:
+    pip install conan --upgrade
+
+Next, check the list of Conan repositories and add *center.conan.io* if needed:
 
     $ conan remote add conan-center https://center.conan.io
     $ conan remote list
     conan-center: https://center.conan.io [Verify SSL: True]
 
+When using GCC on Linux, check profile and, if needed, specify that [new ABI should be used](https://docs.conan.io/en/latest/howtos/manage_gcc_abi.html)
 
+    conan profile update settings.compiler.libcxx=libstdc++11 default
+    conan profile show default
 
 Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
@@ -56,7 +61,7 @@ What we know for sure is that we need *blastinput* library.
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.1
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     [generators]
@@ -65,7 +70,7 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*
 
 and *CMakeLists.txt*:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -85,6 +90,7 @@ Configure and build:
     cmake ..
     make
 
+On Windows, you should either open the generated solution in *Visual Studio* and build a proper configuration, or use *msbuild*.
 
 <a name="recipe_Options"></a>
 ## Define build options.
@@ -94,7 +100,7 @@ You can request desired options in conanfile.txt. For example, the following ins
 shared libraries and use static libraries of external packages:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.1
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
@@ -139,7 +145,7 @@ what exactly it needs, but it definitely will be overwhelmed. Also, it takes mor
 
 Note that using *CONAN_LIBS* is not a requirement. It is perfectly possible to reference *blastinput* directly. Change your CMakeLists.txt to look as follows:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -157,7 +163,7 @@ This approach is better in a sense that you can drop *ncbi-cxx-toolkit-public:wi
 The Toolkit contains [datatool](https://ncbi.github.io/cxx-toolkit/pages/ch_app.html#ch_app.datatool) application, which can generate C++ data storage classes from ASN.1, DTD, XML schema or JSON schema specification. These classes can then be used to [read and write data](https://ncbi.github.io/cxx-toolkit/pages/ch_ser) in ASN.1, XML or JSON format.
 To add code generation into a project, use *NCBI_generate_cpp* command. For example:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -174,13 +180,13 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.1
+    ncbi-cxx-toolkit-public/26.0.0
     protobuf/3.17.1
     grpc/1.38.0
 
 Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate_cpp*:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -199,7 +205,7 @@ NCBI C++ Toolkit includes [NCBIptb](https://ncbi.github.io/cxx-toolkit/pages/ch_
 
 For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as well look like the following:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -221,7 +227,7 @@ All header files are then expected to be in *include* and its subdirectories; so
 
 In other words, your root *CMakeLists.txt* should look like this:
 
-    cmake_minimum_required(VERSION 3.9)
+    cmake_minimum_required(VERSION 3.15)
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
@@ -252,7 +258,7 @@ Otherwise clone this repository and export the recipe into the local Conan cache
 Reference the package in conanfile.txt of your project:
 
     [requires]
-    ncbi-cxx-toolkit-public/26.0.1
+    ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=xncbi
 
