@@ -42,6 +42,11 @@ Next, check the list of Conan repositories and add *center.conan.io*:
     $ conan remote list
     conan-center: https://center.conan.io [Verify SSL: True]
 
+Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
+Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
+in user home directory, which, most likely does not have enough space. To place Conan's cache into another location, 
+you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
+
 Check the list of Conan [profiles](https://docs.conan.io/en/latest/reference/commands/misc/profile.html). Create *default* one:
 
     conan profile list
@@ -52,11 +57,6 @@ When using GCC on Linux, check profile and specify that [new ABI should be used]
 
     conan profile update settings.compiler.libcxx=libstdc++11 default
     conan profile show default
-
-Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
-Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
-in user home directory, which, most likely does not have enough space. To place Conan's cache into another location, 
-you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
 
 Clone this repository and export the recipe into the local Conan cache:
 
@@ -292,7 +292,7 @@ Install the requirements and configure the projects
 <a name="recipe_Center"></a>
 ## NCBI C++ Toolkit in JFrog ConanCenter.
 For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
-To use *ConanCenter* recipe, specify version 26.0.1 in project requirements (in *conanfile.txt*)
+To use *ConanCenter* recipe, **do not** clone this repository, **do not** export the recipe, and specify version 26.0.1 in project requirements (in *conanfile.txt*)
 
     [requires]
     ncbi-cxx-toolkit-public/26.0.1
