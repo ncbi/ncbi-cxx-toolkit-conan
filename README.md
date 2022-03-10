@@ -9,6 +9,7 @@
 7. [Data serialization support.](#recipe_Serial)
 8. [NCBIptb build process management.](#recipe_NCBIptb)
 9. [Recap.](#recipe_Recap)
+10. [NCBI C++ Toolkit in JFrog ConanCenter.](#recipe_Center)
 
 
 <a name="recipe_Conan"></a>
@@ -31,17 +32,23 @@ then the Toolkit itself. It is not always clear what exactly is required. Conan'
 <a name="recipe_Env"></a>
 ## Preparing work environment.
 
-First, you need Conan. For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html). Note that Conan evolves, recipes change. As of March 2022, you need at least version 1.43. If needed, upgrade Conan installation:
+First, you need Conan (and, to install Conan, you need Python). For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html). Note that Conan evolves, recipes change. As of March 2022, you need at least version 1.43. If needed, upgrade Conan installation:
 
     pip install conan --upgrade
 
-Next, check the list of Conan repositories and add *center.conan.io* if needed:
+Next, check the list of Conan repositories and add *center.conan.io*:
 
     $ conan remote add conan-center https://center.conan.io
     $ conan remote list
     conan-center: https://center.conan.io [Verify SSL: True]
 
-When using GCC on Linux, check profile and, if needed, specify that [new ABI should be used](https://docs.conan.io/en/latest/howtos/manage_gcc_abi.html)
+Check the list of Conan profiles. Create *default* one:
+
+    conan profile list
+    conan profile new default --detect
+    conan profile show default
+
+When using GCC on Linux, check profile and specify that [new ABI should be used](https://docs.conan.io/en/latest/howtos/manage_gcc_abi.html)
 
     conan profile update settings.compiler.libcxx=libstdc++11 default
     conan profile show default
@@ -50,6 +57,17 @@ Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require co
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
 in user home directory, which, most likely does not have enough space. To place Conan's cache into another location, 
 you should define [CONAN_USER_HOME](https://docs.conan.io/en/latest/reference/env_vars.html) environment variable.
+
+Clone this repository and export the recipe into the local Conan cache:
+
+    git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan
+    cd ncbi-cxx-toolkit-conan
+    conan export .
+
+NCBI C++ Toolkit versions:
+
+- 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
+- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
 
 
 <a name="recipe_Build"></a>
@@ -85,12 +103,17 @@ Create build directory and install build requirements:
     conan install .. --build missing
 
 
-Configure and build:
+[Configure](https://cmake.org/cmake/help/latest/manual/cmake.1.html#generate-a-project-buildsystem) and
+[build](https://cmake.org/cmake/help/latest/manual/cmake.1.html#build-a-project):
 
     cmake ..
-    make
+    cmake --build .
 
-On Windows, you should either open the generated solution in *Visual Studio* and build a proper configuration, or use *msbuild*.
+Or, on Windows:
+
+    cmake ..
+    cmake --build . --config Release
+
 
 <a name="recipe_Options"></a>
 ## Define build options.
@@ -247,15 +270,13 @@ In case of data serialization projects, you should follow the standard *NCBIptb*
 <a name="recipe_Recap"></a>
 ## Recap.
 
-For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
-To use ConanCenter recipe, skip this "conan export" step.
-Otherwise clone this repository and export the recipe into the local Conan cache:
+Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan
     cd ncbi-cxx-toolkit-conan
     conan export .
 
-Reference the package in conanfile.txt of your project:
+Reference the package in *conanfile.txt* of your project:
 
     [requires]
     ncbi-cxx-toolkit-public/26.0.0
@@ -267,10 +288,20 @@ Install the requirements and configure the projects
     conan install . --build missing
     cmake .
 
-NCBI C++ Toolkit versions:
 
-- 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public/tree/master)
-- 26.0.0 - Toolkit release [v26.0.0](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases)
+<a name="recipe_Center"></a>
+## NCBI C++ Toolkit in JFrog ConanCenter.
+For the Toolkit recipe, it is possible to use either [JFrog ConanCenter](https://conan.io/center/ncbi-cxx-toolkit-public) or this repository.
+To use *ConanCenter* recipe, specify version 26.0.1 in project requirements (in *conanfile.txt*)
+
+    [requires]
+    ncbi-cxx-toolkit-public/26.0.1
+
+*ConanCenter* recipe does not support *GRPC* and *PROTOBUF* 3-rd party packages, and also lacks support of *sharedDeps* options.
+Note that Conan tries to reuse (download from *ConanCenter*) already existing binary packages which match your build configuration.
+If for some reason the build fails, rebuild the Toolkit locally when configuring:
+
+    conan install .. --build missing --build ncbi-cxx-toolkit-public
 
 
 
