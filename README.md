@@ -42,7 +42,7 @@ Next, check the list of Conan repositories and add *center.conan.io*:
     $ conan remote list
     conan-center: https://center.conan.io [Verify SSL: True]
 
-Check the list of Conan profiles. Create *default* one:
+Check the list of Conan [profiles](https://docs.conan.io/en/latest/reference/commands/misc/profile.html). Create *default* one:
 
     conan profile list
     conan profile new default --detect
