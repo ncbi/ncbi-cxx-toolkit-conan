@@ -38,7 +38,8 @@ class NcbiCxxToolkit(ConanFile):
         "fPIC":       [True, False],
         "with_projects": "ANY",
         "with_targets":  "ANY",
-        "with_tags":     "ANY"
+        "with_tags":     "ANY",
+        "with_local": [True, False]
     }
     default_options = {
         "shared":     False,
@@ -46,7 +47,8 @@ class NcbiCxxToolkit(ConanFile):
         "fPIC":       True,
         "with_projects":  "",
         "with_targets":   "",
-        "with_tags":      ""
+        "with_tags":      "",
+        "with_local": False
     }
     NCBI_to_Conan_requires = {
 #"BACKWARD":     "backward-cpp/1.6"
@@ -193,6 +195,10 @@ class NcbiCxxToolkit(ConanFile):
             cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
         if self.options.with_tags != "":
             cmake.definitions["NCBI_PTBCFG_PROJECT_TAGS"] = self.options.with_tags
+        if self.options.with_local:
+            cmake.definitions["NCBI_PTBCFG_USELOCAL"] = "TRUE"
+        if self.settings.compiler == "Visual Studio":
+            cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = self.settings.build_type
         return cmake
 
 #----------------------------------------------------------------------------
@@ -217,6 +223,10 @@ class NcbiCxxToolkit(ConanFile):
             del self.options.fPIC
 
 #----------------------------------------------------------------------------
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires("{}/{}".format(self.name, self.version))
+
     def requirements(self):
         if not self.version in self.conan_data["sources"].keys():
             raise ConanException("Invalid Toolkit version requested. Available: " + ' '.join(self.conan_data["sources"].keys()))
@@ -297,6 +307,16 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     def package_info(self):
         allrequires = self.all_NCBI_requires
+        self.cpp_info.components["Boost"].system_libs = []
+        self.cpp_info.components["FASTCGI"].system_libs = []
+        self.cpp_info.components["FASTCGIPP"].system_libs = []
+        self.cpp_info.components["NCBI_C"].system_libs = []
+        self.cpp_info.components["VDB"].system_libs = []
+        self.cpp_info.components["Sybase"].system_libs = []
+        self.cpp_info.components["ODBC"].system_libs = []
+        self.cpp_info.components["PYTHON"].system_libs = []
+        self.cpp_info.components["wxWidgets"].system_libs = []
+
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].system_libs = ["ws2_32", "dbghelp"]
             self.cpp_info.components["NETWORKLIBS"].system_libs = [""]
