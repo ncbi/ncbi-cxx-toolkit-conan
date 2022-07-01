@@ -118,16 +118,15 @@ Or, on Windows:
 <a name="recipe_Options"></a>
 ## Define build options.
 
-NCBI C++ Toolkit libraries can be built as either shared or static ones. The same applies to external packages. 
+NCBI C++ Toolkit libraries can be built as either shared or static ones.
 You can request desired options in conanfile.txt. For example, the following instructs Conan to use NCBI C++ Toolkit 
-shared libraries and use static libraries of external packages:
+shared libraries:
 
     [requires]
     ncbi-cxx-toolkit-public/26.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
-    ncbi-cxx-toolkit-public:sharedDeps=False
     [generators]
     cmake
 
@@ -297,7 +296,7 @@ To use *ConanCenter* recipe, **do not** clone this repository, **do not** export
     [requires]
     ncbi-cxx-toolkit-public/26.0.1
 
-*ConanCenter* recipe does not support *GRPC* and *PROTOBUF* 3-rd party packages, and also lacks support of *sharedDeps* options.
+*ConanCenter* recipe does not support *GRPC* and *PROTOBUF* 3-rd party packages.
 Note that Conan tries to reuse (download from *ConanCenter*) already existing binary packages which match your build configuration.
 If for some reason the build fails, rebuild the Toolkit locally when configuring:
 
