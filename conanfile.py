@@ -1,19 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, conan_version
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan import tools
 import os
-import shutil
-import subprocess
-import tempfile
-import sys
-import stat
+import yaml
 
-def _remove_readonly(fn, path, excinfo):
-    try:
-        os.chmod(path, stat.S_IWRITE)
-        fn(path)
-    except Exception as exc:
-        print("Skipped: ", path, " because ", exc)
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
@@ -25,20 +16,20 @@ class NcbiCxxToolkit(ConanFile):
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
     short_paths = False
-
-    tk_tmp_tree = ""
-    tk_src_tree = ""
-    all_NCBI_requires = {}
+    tk_dependencies = None
+    tk_requirements = None
+    tk_componenttargets = set()
 
     options = {
         "shared":     [True, False],
         "fPIC":       [True, False],
-        "with_projects": "ANY",
-        "with_targets":  "ANY",
-        "with_tags":     "ANY",
-        "with_local": [True, False]
+        "with_projects": ["ANY"],
+        "with_targets":  ["ANY"],
+        "with_tags":     ["ANY"],
+        "with_components": ["ANY"],
+        "with_local": [True, False],
+        "with_internal": [True, False]
     }
     default_options = {
         "shared":     False,
@@ -46,85 +37,23 @@ class NcbiCxxToolkit(ConanFile):
         "with_projects":  "",
         "with_targets":   "",
         "with_tags":      "",
-        "with_local": False
-    }
-    NCBI_to_Conan_requires = {
-        "BACKWARD":     "backward-cpp/1.6",
-        "UNWIND":       "libunwind/1.6.2",
-        "BerkeleyDB":   "libdb/5.3.28",
-        "Boost":        "boost/1.79.0",
-        "BZ2":          "bzip2/1.0.8",
-        "CASSANDRA":    "cassandra-cpp-driver/2.15.3",
-        "GIF":          "giflib/5.2.1",
-        "GRPC":         "grpc/1.43.2",
-        "JPEG":         "libjpeg/9d",
-        "LMDB":         "lmdb/0.9.29",
-        "LZO":          "lzo/2.10",
-        "MySQL":        "libmysqlclient/8.0.25",
-        "NGHTTP2":      "libnghttp2/1.47.0",
-        "PCRE":         "pcre/8.45",
-        "PNG":          "libpng/1.6.37",
-        "PROTOBUF":     "protobuf/3.20.0",
-        "SQLITE3":      "sqlite3/3.38.1",
-        "TIFF":         "libtiff/4.3.0",
-        "XML":          "libxml2/2.9.13",
-        "XSLT":         "libxslt/1.1.34",
-        "UV":           "libuv/1.44.1",
-        "Z":            "zlib/1.2.12",
-
-        "OpenSSL":      "openssl/1.1.1n"
-    }
-    Conan_package_options = {
-        "libnghttp2": {
-            "with_app": False,
-            "with_hpack": False
-        },
-        "grpc": {
-            "cpp_plugin": True,
-            "csharp_plugin": False,
-            "node_plugin": False,
-            "objective_c_plugin": False,
-            "php_plugin": False,
-            "python_plugin": False,
-            "ruby_plugin": False
-        }
+        "with_components": "",
+        "with_local": False,
+        "with_internal": False
     }
 
 #----------------------------------------------------------------------------
-    def set_version(self):
-        if self.version == None:
-            self.version = "26.0.0"
+#    def set_version(self):
+#        if self.version == None:
+#            self.version = "0.0.0"
 
-    def __del__(self):
-        if os.path.isdir(self.tk_tmp_tree):
-            print("Just a moment...")
-            self._remove_tmp_tree(self.tk_tmp_tree)
-
-    def _remove_tmp_tree(self, path):
-        if os.path.isdir(path):
-            os.chdir(os.path.join(self.tk_tmp_tree, ".."))
-            try:
-                shutil.rmtree(path, onerror=_remove_readonly)
-            except:
-                print("Cannot remove directory: ", path)
-                print("Please remove it manually")
-
-#----------------------------------------------------------------------------
-    def _get_RequiresMapKeys(self):
-        return self.NCBI_to_Conan_requires.keys()
-
-#----------------------------------------------------------------------------
-    def _translate_ReqKey(self, key):
-        if key in self.NCBI_to_Conan_requires.keys():
-#ATTENTION
-            if (key == "BACKWARD" or key == "UNWIND") and (self.settings.os == "Windows" or self.settings.os == "Macos"):
-                return None
-            if key == "BerkeleyDB" and self.settings.os == "Windows":
-                return None
-            if key == "CASSANDRA" and (self.settings.os == "Windows" or self.settings.os == "Macos"):
-                return None
-            return self.NCBI_to_Conan_requires[key]
-        return None
+    def export(self):
+        tools.files.copy(self, self._dependencies_filename,
+            os.path.join(self.recipe_folder, self._dependencies_folder),
+            os.path.join(self.export_folder, self._dependencies_folder))
+        tools.files.copy(self, self._requirements_filename,
+            os.path.join(self.recipe_folder, self._dependencies_folder),
+            os.path.join(self.export_folder, self._dependencies_folder))
 
 #----------------------------------------------------------------------------
     @property
@@ -132,83 +61,74 @@ class NcbiCxxToolkit(ConanFile):
         return "src"
 
     @property
-    def _build_subfolder(self):
-#ATTENTION: v26 does not support "build_subfolder"
-        return "b" if tools.Version(self.version).major != "26" else "."
+    def _dependencies_folder(self):
+        return "dependencies"
 
-    def _get_Source(self):
-        self.tk_tmp_tree = tempfile.mkdtemp(dir=os.getcwd())
-        src = os.path.normpath(os.path.join(self.recipe_folder, "..", "source", self._source_subfolder))
-        src_found = False;
-        if os.path.isdir(src):
-            self.tk_src_tree = src
-            src_found = True;
-        else:
-            print("getting Toolkit sources...")
-            tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
-            tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
-            tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "master"
-            tk_svn = self.conan_data["sources"][self.version]["svn"] if "svn" in self.conan_data["sources"][self.version].keys() else ""
+    @property
+    def _dependencies_filename(self):
+        return "dependencies-{}.{}.yml".format(tools.scm.Version(self.version).major, tools.scm.Version(self.version).minor)
 
-            if tk_url != "":
-                print("from url: " + tk_url)
-                curdir = os.getcwd()
-                os.chdir(self.tk_tmp_tree)
-                tools.get(tk_url, strip_root = True)
-                os.chdir(curdir)
-                src_found = True;
+    @property
+    def _requirements_filename(self):
+        return "requirements-{}.{}.yml".format(tools.scm.Version(self.version).major, tools.scm.Version(self.version).minor)
 
-            if not src_found and tk_git != "":
-                print("from git: " + tk_git + "/" + tk_branch)
-                try:
-                    git = tools.Git(self.tk_tmp_tree)
-                    git.clone(tk_git, branch = tk_branch, args = "--single-branch", shallow = True)
-                    src_found = True;
-                except Exception:
-                    print("git failed")
+    @property
+    def _tk_dependencies(self):
+        if self.tk_dependencies is None:
+            dependencies_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._dependencies_filename)
+            if not os.path.isfile(dependencies_filepath):
+                raise ConanException("Cannot find {}".format(dependencies_filepath))
+            self.tk_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return self.tk_dependencies
 
-            if not src_found and tk_svn != "":
-                print("from svn: " + tk_svn)
-                try:
-                    svn = tools.SVN(self.tk_tmp_tree)
-                    svn.checkout(tk_svn)
-                    src_found = True;
-                except Exception:
-                    print("svn failed")
-
-            if not src_found:
-                raise ConanException("Failed to find the Toolkit sources")
-            self.tk_src_tree = os.path.join(self.tk_tmp_tree, self._source_subfolder)
+    @property
+    def _tk_requirements(self):
+        if self.tk_requirements is None:
+            requirements_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._requirements_filename)
+            if not os.path.isfile(requirements_filepath):
+                raise ConanException("Cannot find {}".format(requirements_filepath))
+            self.tk_requirements = yaml.safe_load(open(requirements_filepath))
+        return self.tk_requirements
 
 #----------------------------------------------------------------------------
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
-        if self.options.shared:
-            cmake.definitions["NCBI_PTBCFG_ALLOW_COMPOSITE"] = "TRUE"
-        cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = str(self.options.with_projects) + ";-app/netcache"
-        if self.options.with_targets != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        if self.options.with_tags != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TAGS"] = self.options.with_tags
-        if self.options.with_local:
-            cmake.definitions["NCBI_PTBCFG_USELOCAL"] = "TRUE"
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["CMAKE_CONFIGURATION_TYPES"] = self.settings.build_type
-        return cmake
+    def _translate_req(self, key):
+        if "Boost" in key:
+            key = "Boost"
+        if key in self._tk_requirements["disabled"].keys():
+            if self.settings.os in self._tk_requirements["disabled"][key]:
+                return None
+        if self.options.with_internal:
+            if key in self._tk_requirements["internal-requirements"].keys():
+                return self._tk_requirements["internal-requirements"][key]
+        if key in self._tk_requirements["requirements"].keys():
+            return self._tk_requirements["requirements"][key]
+        return None
+
+    def _parse_option(self, data):
+        _res = set()
+        if data != "":
+            _data = str(data)
+            _data = _data.replace(",", ";")
+            _data = _data.replace(" ", ";")
+            _res.update(_data.split(";"))
+            if "" in _res:
+                _res.remove("")
+        return _res
 
 #----------------------------------------------------------------------------
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.build.check_min_cppstd(self, 17)
         if self.settings.os not in ["Linux", "Macos", "Windows"]:   
             raise ConanInvalidConfiguration("This operating system is not supported")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if tools.microsoft.is_msvc(self):
+            tools.microsoft.check_min_vs(self, "190")
+            if self.options.shared and tools.microsoft.is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("This configuration is not supported")
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
+        if tools.build.cross_building(self):
+            raise ConanInvalidConfiguration("Cross compilation is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -216,115 +136,194 @@ class NcbiCxxToolkit(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if "options" in self._tk_requirements.keys():
+            for pkg in self._tk_requirements["options"]:
+                dest = vars(self.options[pkg + "*"])["_dict" if conan_version.major == "1" else "_data"]
+                options = self._tk_requirements["options"][pkg]
+                for opt in options.keys():
+                    dest[opt] = options[opt]
+
+    def layout(self):
+       cmake_layout(self)
+       self.folders.source = self._source_subfolder
 
 #----------------------------------------------------------------------------
-    def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            self.build_requires("{}/{}".format(self.name, self.version))
+#    def build_requirements(self):
+#        if cross_building(self):
+#            self.tool_requires("{}/{}".format(self.name, self.version))
 
     def requirements(self):
-        if not self.version in self.conan_data["sources"].keys():
-            raise ConanException("Invalid Toolkit version requested. Available: " + ' '.join(self.conan_data["sources"].keys()))
-        self.output.info("Analyzing requirements. Please wait...")
-        curdir = os.getcwd()
-        self._get_Source()
-        os.chdir(self.tk_tmp_tree)
-        shared = "ON" if self.options.shared else "OFF"
-        subprocess.run(["cmake", self.tk_src_tree,
-            "-DNCBI_PTBCFG_COLLECT_REQUIRES=ON",
-            "-DNCBI_PTBCFG_COLLECT_REQUIRES_FILE=req",
-            "-DBUILD_SHARED_LIBS='%s'" % shared,
-            "-DNCBI_PTBCFG_PROJECT_TARGETS='%s'" % self.options.with_targets,
-            "-DNCBI_PTBCFG_PROJECT_LIST='%s'" % self.options.with_projects,
-            "-DNCBI_PTBCFG_PROJECT_TAGS='%s'" % self.options.with_tags],
-            stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL)
-        reqfile = os.path.join(self.tk_src_tree, "..", "req")
-        if os.path.isfile(reqfile):
-            self.all_NCBI_requires = set(open(reqfile).read().split())
-            for req in self.all_NCBI_requires:
-                if "Boost" in req:
-                    req = "Boost"
-                pkg = self._translate_ReqKey(req)
-                if pkg is not None:
+        _alltargets = self._parse_option(self.options.with_targets)
+        _required_components = set()
+        for _t in _alltargets:
+            for _component in self._tk_dependencies["components"]:
+                _libraries = self._tk_dependencies["libraries"][_component]
+                if _t in _libraries:
+                    _required_components.add(_component)
+                    break
+
+        _allcomponents = self._parse_option(self.options.with_components)
+        _required_components.update(_allcomponents)
+
+        if len(_required_components) > 0:
+            _todo = _required_components.copy()
+            _required_components.clear()
+            _next = set()
+            while len(_todo) > 0:
+                for _component in _todo:
+                    if not _component in _required_components:
+                        _required_components.add(_component)
+                        if _component in self._tk_dependencies["dependencies"].keys():
+                            for _n in self._tk_dependencies["dependencies"][_component]:
+                                if not _n in _required_components:
+                                    _next.add(_n)
+                _todo = _next.copy()
+                _next.clear()
+
+        if len(_required_components) == 0:
+            _required_components.update( self._tk_dependencies["components"])
+        else:
+            for component in _required_components:
+                self.tk_componenttargets.update(self._tk_dependencies["libraries"][component])
+
+        requirements = set()
+        for component in _required_components:
+            libraries = self._tk_dependencies["libraries"][component]
+            for lib in libraries:
+                if lib in self._tk_dependencies["requirements"].keys():
+                    requirements.update(self._tk_dependencies["requirements"][lib])
+
+        for req in requirements:
+            pkgs = self._translate_req(req)
+            if pkgs is not None:
+                for pkg in pkgs:
                     print("Package requires ", pkg)
                     self.requires(pkg)
-                    pkg = pkg[:pkg.find("/")]
-#ATTENTION
-                    if req == "MySQL":
-                        self.requires(self._translate_ReqKey("OpenSSL"))
-                    if req == "CASSANDRA":
-                        self.requires(self._translate_ReqKey("OpenSSL"))
-                    if pkg == "libnghttp2":
-                        self.options[pkg].with_app = False
-                        self.options[pkg].with_hpack = False
-                    if pkg == "grpc":
-                        self.options[pkg].cpp_plugin = True
-                        self.options[pkg].csharp_plugin = False
-                        self.options[pkg].node_plugin = False
-                        self.options[pkg].objective_c_plugin = False
-                        self.options[pkg].php_plugin = False
-                        self.options[pkg].python_plugin = False
-                        self.options[pkg].ruby_plugin = False
-            os.remove(reqfile)
-        os.chdir(curdir)
 
 #----------------------------------------------------------------------------
     def source(self):
-        if self.tk_tmp_tree == "":
-            self._get_Source()
-        shutil.move(os.path.join(self.tk_tmp_tree, "include"), ".")
-        shutil.move(os.path.join(self.tk_tmp_tree, self._source_subfolder), ".")
-        if os.path.isdir(os.path.join(self.tk_tmp_tree, "scripts")):
-            shutil.move(os.path.join(self.tk_tmp_tree, "scripts"), ".")
-        if os.path.isdir(os.path.join(self.tk_tmp_tree, "doc")):
-            shutil.move(os.path.join(self.tk_tmp_tree, "doc"), ".")
-        self._remove_tmp_tree(self.tk_tmp_tree)
+        src_found = False;
+        print("getting Toolkit sources...")
+        tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
+        tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
+        tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "main"
+
+        if tk_url != "":
+            print("from url: " + tk_url)
+            tools.files.get(self, tk_url, strip_root = True)
+            src_found = True;
+
+        if not src_found and tk_git != "":
+            print("from git: " + tk_git + "/" + tk_branch)
+            try:
+                git = tools.scm.Git(self)
+                git.clone(tk_git, target = ".", args = ["--single-branch", "--branch", tk_branch, "--depth", "1"])
+                src_found = True;
+            except Exception:
+                print("git failed")
+
+        if not src_found:
+            raise ConanException("Failed to find the Toolkit sources")
+        root = os.path.join(os.getcwd(), "CMakeLists.txt")
+        with open(root, "w") as f:
+            f.write("cmake_minimum_required(VERSION 3.15)\n")
+            f.write("project(ncbi-cpp)\n")
+            f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
+            f.write("add_subdirectory(src)\n")
+
+#----------------------------------------------------------------------------
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NCBI_PTBCFG_PACKAGING"] = True
+        if self.options.shared:
+            tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
+        tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = str(self.options.with_projects) + ";-app/netcache"
+        if self.options.with_targets != "":
+            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
+        if len(self.tk_componenttargets) != 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self.tk_componenttargets)
+        tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = str(self.options.with_tags) + ";-test;-demo;-sample"
+        if self.options.with_local:
+            tc.variables["NCBI_PTBCFG_USELOCAL"] = True
+        if tools.microsoft.is_msvc(self):
+            tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
+        tc.generate()
+        cmdep = CMakeDeps(self)
+        cmdep.generate()
 
 #----------------------------------------------------------------------------
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.configure(source_folder=self._source_subfolder, build_folder = self._build_subfolder)
+        cmake = CMake(self)
+        cmake.configure()
 # Visual Studio sometimes runs "out of heap space"
-        if self.settings.compiler == "Visual Studio":
+        if tools.microsoft.is_msvc(self):
             cmake.parallel = False
         cmake.build()
 
 #----------------------------------------------------------------------------
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install(build_dir = self._build_subfolder)
-
-#    def imports(self):
-#        self.copy("license*", dst="licenses", folder=True, ignore_case=True)
+        cmake = CMake(self)
+        cmake.install()
 
 #----------------------------------------------------------------------------
     def package_info(self):
+        impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
+        allexports = set(open(impfile).read().split())
+        absent = []
+        for component in self._tk_dependencies["components"]:
+            c_libs = []
+            libraries = self._tk_dependencies["libraries"][component]
+            for lib in libraries:
+                if lib in allexports:
+                    c_libs.append(lib)
+            if len(c_libs) == 0 and not len(libraries) == 0:
+                absent.append(component)
+        for component in self._tk_dependencies["components"]:
+            c_libs = []
+            c_reqs = []
+            n_reqs = set()
+            c_deps = self._tk_dependencies["dependencies"][component]
+            for c in c_deps:
+                if c in absent:
+                    c_deps.remove(c)
+            c_reqs.extend(c_deps)
+            libraries = self._tk_dependencies["libraries"][component]
+            for lib in libraries:
+                if lib in allexports:
+                    c_libs.append(lib)
+                if lib in self._tk_dependencies["requirements"].keys():
+                    n_reqs.update(self._tk_dependencies["requirements"][lib])
+            for req in n_reqs:
+                pkgs = self._translate_req(req)
+                if pkgs is not None:
+                    for pkg in pkgs:
+                        pkg = pkg[:pkg.find("/")]
+                        ref = pkg + "::" + pkg
+                        c_reqs.append(ref)
+            if not len(c_libs) == 0 or (len(libraries) == 0 and not len(c_reqs) == 0):
+                self.cpp_info.components[component].libs = c_libs
+                self.cpp_info.components[component].requires = c_reqs
 
-        self.cpp_info.includedirs = ["include"]
-        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32", "dbghelp"]
-        elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "rt", "m", "pthread", "resolv"]
-        elif self.settings.os == "Macos":
-            self.cpp_info.system_libs = ["dl", "c", "m", "pthread", "resolv"]
-#----------------------------------------------------------------------------
-        if self.settings.os == "Windows":
-            self.cpp_info.defines.append("_UNICODE")
-            self.cpp_info.defines.append("_CRT_SECURE_NO_WARNINGS=1")
+            self.cpp_info.components["core"].defines.append("_UNICODE")
+            self.cpp_info.components["core"].defines.append("_CRT_SECURE_NO_WARNINGS=1")
         else:
-            self.cpp_info.defines.append("_MT")
-            self.cpp_info.defines.append("_REENTRANT")
-            self.cpp_info.defines.append("_THREAD_SAFE")
-            self.cpp_info.defines.append("_LARGEFILE_SOURCE")
-            self.cpp_info.defines.append("_LARGEFILE64_SOURCE")
-            self.cpp_info.defines.append("_FILE_OFFSET_BITS=64")
+            self.cpp_info.components["core"].defines.append("_MT")
+            self.cpp_info.components["core"].defines.append("_REENTRANT")
+            self.cpp_info.components["core"].defines.append("_THREAD_SAFE")
+            self.cpp_info.components["core"].defines.append("_FILE_OFFSET_BITS=64")
         if self.options.shared:
-            self.cpp_info.defines.append("NCBI_DLL_BUILD")
+            self.cpp_info.components["core"].defines.append("NCBI_DLL_BUILD")
         if self.settings.build_type == "Debug":
-            self.cpp_info.defines.append("_DEBUG")
+            self.cpp_info.components["core"].defines.append("_DEBUG")
         else:
-            self.cpp_info.defines.append("NDEBUG")
-        self.cpp_info.builddirs.append("res")
-        self.cpp_info.build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
+            self.cpp_info.components["core"].defines.append("NDEBUG")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["core"].system_libs = ["ws2_32", "dbghelp"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.components["core"].system_libs = ["dl", "rt", "m", "pthread", "resolv"]
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
+        self.cpp_info.components["core"].builddirs.append("res")
+        self.cpp_info.components["core"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
