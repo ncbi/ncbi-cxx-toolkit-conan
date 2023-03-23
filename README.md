@@ -64,9 +64,9 @@ When using GCC on Linux, check profile and specify that [new ABI should be used]
 
 Clone this repository and export the recipe into the local Conan cache:
 
-    git clone ssh://git@bitbucket.be-md.ncbi.nlm.nih.gov:9418/cxx/ncbi-cxx-toolkit-conan.git
+    git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export .
+    conan export . 27.0.0@_/_
 
 NCBI C++ Toolkit versions:
 
