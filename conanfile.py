@@ -1,61 +1,47 @@
 from conan import ConanFile, conan_version
-from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 from conan import tools
 import os
 import yaml
+required_conan_version = ">=1.53.0"
 
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
-    license = "CC0-1.0"
-    homepage = "https://ncbi.github.io/cxx-toolkit"
-    url = "https://github.com/ncbi/ncbi-cxx-toolkit-conan.git"
     description = "NCBI C++ Toolkit -- a cross-platform application framework and a collection of libraries for working with biological data."
+    license = "CC0-1.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://ncbi.github.io/cxx-toolkit"
     topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
-    settings = "os", "compiler", "build_type", "arch"
-    short_paths = False
-    tk_dependencies = None
-    tk_requirements = None
-    tk_componenttargets = set()
-
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared":     [True, False],
         "fPIC":       [True, False],
         "with_projects": ["ANY"],
         "with_targets":  ["ANY"],
-        "with_tags":     ["ANY"],
-        "with_components": ["ANY"],
-        "with_local": [True, False],
-        "with_internal": [True, False]
+        "with_components": ["ANY"]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
         "with_projects":  "",
         "with_targets":   "",
-        "with_tags":      "",
-        "with_components": "",
-        "with_local": False,
-        "with_internal": False
+        "with_components": ""
     }
+    short_paths = True
+    tk_dependencies = None
+    tk_requirements = None
+    tk_componenttargets = set()
 
 #----------------------------------------------------------------------------
-#    def set_version(self):
-#        if self.version == None:
-#            self.version = "0.0.0"
+    @property
+    def _min_cppstd(self):
+        return 17
 
-    def export(self):
-        tools.files.copy(self, self._dependencies_filename,
-            os.path.join(self.recipe_folder, self._dependencies_folder),
-            os.path.join(self.export_folder, self._dependencies_folder))
-        tools.files.copy(self, self._requirements_filename,
-            os.path.join(self.recipe_folder, self._dependencies_folder),
-            os.path.join(self.export_folder, self._dependencies_folder))
-
-#----------------------------------------------------------------------------
     @property
     def _source_subfolder(self):
         return "src"
@@ -97,9 +83,6 @@ class NcbiCxxToolkit(ConanFile):
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
                 return None
-        if self.options.with_internal:
-            if key in self._tk_requirements["internal-requirements"].keys():
-                return self._tk_requirements["internal-requirements"][key]
         if key in self._tk_requirements["requirements"].keys():
             return self._tk_requirements["requirements"][key]
         return None
@@ -116,43 +99,30 @@ class NcbiCxxToolkit(ConanFile):
         return _res
 
 #----------------------------------------------------------------------------
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, 17)
-        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
-            raise ConanInvalidConfiguration("This operating system is not supported")
-        if tools.microsoft.is_msvc(self):
-            tools.microsoft.check_min_vs(self, "190")
-            if self.options.shared and tools.microsoft.is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("This version of GCC is not supported")
-        if tools.build.cross_building(self):
-            raise ConanInvalidConfiguration("Cross compilation is not supported")
+    def export(self):
+        tools.files.copy(self, self._dependencies_filename,
+            os.path.join(self.recipe_folder, self._dependencies_folder),
+            os.path.join(self.export_folder, self._dependencies_folder))
+        tools.files.copy(self, self._requirements_filename,
+            os.path.join(self.recipe_folder, self._dependencies_folder),
+            os.path.join(self.export_folder, self._dependencies_folder))
 
+#----------------------------------------------------------------------------
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+#----------------------------------------------------------------------------
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if "options" in self._tk_requirements.keys():
-            for pkg in self._tk_requirements["options"]:
-                dest = vars(self.options[pkg + "*"])["_dict" if conan_version.major == "1" else "_data"]
-                options = self._tk_requirements["options"][pkg]
-                for opt in options.keys():
-                    dest[opt] = options[opt]
 
+#----------------------------------------------------------------------------
     def layout(self):
        cmake_layout(self)
        self.folders.source = self._source_subfolder
 
 #----------------------------------------------------------------------------
-#    def build_requirements(self):
-#        if cross_building(self):
-#            self.tool_requires("{}/{}".format(self.name, self.version))
-
     def requirements(self):
         _alltargets = self._parse_option(self.options.with_targets)
         _required_components = set()
@@ -202,29 +172,23 @@ class NcbiCxxToolkit(ConanFile):
                     self.requires(pkg)
 
 #----------------------------------------------------------------------------
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
+            raise ConanInvalidConfiguration("This operating system is not supported")
+        if tools.microsoft.is_msvc(self):
+            tools.microsoft.check_min_vs(self, "190")
+            if self.options.shared and tools.microsoft.is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("This configuration is not supported")
+        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("This version of GCC is not supported")
+        if tools.build.cross_building(self):
+            raise ConanInvalidConfiguration("Cross compilation is not supported")
+
+#----------------------------------------------------------------------------
     def source(self):
-        src_found = False;
-        print("getting Toolkit sources...")
-        tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
-        tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
-        tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "main"
-
-        if tk_url != "":
-            print("from url: " + tk_url)
-            tools.files.get(self, tk_url, strip_root = True)
-            src_found = True;
-
-        if not src_found and tk_git != "":
-            print("from git: " + tk_git + "/" + tk_branch)
-            try:
-                git = tools.scm.Git(self)
-                git.clone(tk_git, target = ".", args = ["--single-branch", "--branch", tk_branch, "--depth", "1"])
-                src_found = True;
-            except Exception:
-                print("git failed")
-
-        if not src_found:
-            raise ConanException("Failed to find the Toolkit sources")
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
         root = os.path.join(os.getcwd(), "CMakeLists.txt")
         with open(root, "w") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
@@ -243,9 +207,6 @@ class NcbiCxxToolkit(ConanFile):
             tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
         if len(self.tk_componenttargets) != 0:
             tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self.tk_componenttargets)
-        tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = str(self.options.with_tags) + ";-test;-demo;-sample"
-        if self.options.with_local:
-            tc.variables["NCBI_PTBCFG_USELOCAL"] = True
         if tools.microsoft.is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.generate()

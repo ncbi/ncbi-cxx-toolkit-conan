@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
-project(PackageTest)
+project(test_package)
 set(PackageName ncbi-cxx-toolkit-public)
 
-find_package(${PackageName} REQUIRED)
-add_executable(basic_sample basic_sample.cpp)
-target_link_libraries(basic_sample ${PackageName}::${PackageName})
+find_package(${PackageName} REQUIRED CONFIG)
+add_executable(${PROJECT_NAME} basic_sample.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PackageName}::${PackageName})
