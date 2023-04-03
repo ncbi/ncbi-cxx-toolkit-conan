@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
@@ -44,6 +44,14 @@ class NcbiCxxToolkit(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
 
     @property
     def _source_subfolder(self):
@@ -111,6 +119,9 @@ class NcbiCxxToolkit(ConanFile):
         copy(self, self._requirements_filename,
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
 #----------------------------------------------------------------------------
     def config_options(self):
@@ -182,17 +193,20 @@ class NcbiCxxToolkit(ConanFile):
         if self.settings.os not in ["Linux", "Macos", "Windows"]:
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
-            check_min_vs(self, "190")
+            check_min_vs(self, 192)
             if self.options.shared and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("This version of GCC is not supported")
+        else:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"This version of {self.settings.compiler} is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
 #----------------------------------------------------------------------------
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         root = os.path.join(os.getcwd(), "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
