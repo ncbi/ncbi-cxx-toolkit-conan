@@ -5,7 +5,7 @@
  if(NCBI_COMPILER_GCC)
  
 -    if("${NCBI_COMPILER_VERSION}" LESS "730")
-+    if("${NCBI_COMPILER_VERSION}" LESS "740")
++    if("${NCBI_COMPILER_VERSION}" LESS "700")
          add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
      endif()
      if(BinRelease IN_LIST NCBI_PTBCFG_PROJECT_FEATURES)
