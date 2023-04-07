@@ -36,6 +36,10 @@ On February 22, 2023 Conan 2.0 was released. It is a major upgrade, which featur
 
 The Toolkit recipe is fully compatible both with Conan 1.X and 2.0, but some of the dependent packages are not. Sure, over time, things will change and those recipes will be fixed.
 
+Install Conan v1.59.0:
+
+    pip install conan==1.59.0
+
 If needed, upgrade Conan installation:
 
     pip install conan --upgrade
@@ -77,7 +81,7 @@ NCBI C++ Toolkit versions:
 <a name="recipe_Build"></a>
 ## Building your project.
 
-Let us build [blast_demo](https://bitbucket.ncbi.nlm.nih.gov/projects/CXX/repos/ncbi-cxx-toolkit-public/browse/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application. It requires one source file and some unknown number of the Toolkit libraries. 
+Let us build [blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application. It requires one source file and some unknown number of the Toolkit libraries. 
 What we know for sure is that we need *blastinput* library.
 
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
