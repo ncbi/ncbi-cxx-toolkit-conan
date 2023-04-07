@@ -251,6 +251,7 @@ In other words, your root *CMakeLists.txt* should look like this:
     project(conanapp)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
+    NCBIptb_setup()
     NCBI_add_subdirectory(src)
 
 The *blast_demo* example above will also work, of course. But as long as you add more and more projects, it is practically imperative that you adopt the standard NCBIptb source tree structure.
