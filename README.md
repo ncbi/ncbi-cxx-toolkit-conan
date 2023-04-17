@@ -91,17 +91,18 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     [generators]
-    cmake
+    cmake_find_package
 
 
 and *CMakeLists.txt*:
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    set(ncbitk ncbi-cxx-toolkit-public)
+    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    find_package(${ncbitk} REQUIRED)
     add_executable(blast_demo blast_demo.cpp)
-    target_link_libraries(blast_demo ${CONAN_LIBS})
+    target_link_libraries(blast_demo ${ncbitk}::${ncbitk})
 
 
 Create build directory and install build requirements:
@@ -136,7 +137,7 @@ shared libraries:
     ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
     [generators]
-    cmake
+    cmake_find_package
 
 
 To switch between Debug and Release build types, you can use command line when installing Conan dependencies:
@@ -184,8 +185,8 @@ To add code generation into a project, use *NCBI_generate_cpp* command. For exam
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.asn)
     add_executable(asn_demo asn_demo.cpp ${GEN_SOURCES} ${GEN_HEADERS})
     target_link_libraries(asn_demo xser)
@@ -207,8 +208,8 @@ Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate
 
     cmake_minimum_required(VERSION 3.15)
     project(conanapp)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     NCBI_generate_cpp(GEN_SOURCES GEN_HEADERS sample.proto)
     add_library(grpc_demo grpc_demo.cpp ${GEN_SOURCES} ${GEN_HEADERS})
     
@@ -226,8 +227,8 @@ For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as w
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     NCBIptb_setup()
 
     NCBI_begin_app(blast_demo)
@@ -249,8 +250,8 @@ In other words, your root *CMakeLists.txt* should look like this:
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     NCBIptb_setup()
     NCBI_add_subdirectory(src)
 
