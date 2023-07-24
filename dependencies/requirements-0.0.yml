@@ -2,7 +2,7 @@ version: 0.0
 #----------------------------------------------------------------------------
 requirements:
     BACKWARD:   ["backward-cpp/1.6"]
-    UNWIND:     ["libunwind/1.6.2"]
+    UNWIND:     ["libunwind/1.6.2", "xz_utils/5.2.5"]
     BerkeleyDB: ["libdb/5.3.28"]
     BZ2:        ["bzip2/1.0.8"]
     GIF:        ["giflib/5.2.1"]
@@ -10,17 +10,16 @@ requirements:
     JPEG:       ["libjpeg/9e"]
     LMDB:       ["lmdb/0.9.29"]
     LZO:        ["lzo/2.10"]
-    NGHTTP2:    ["libnghttp2/1.51.0"]
+    NGHTTP2:    ["libnghttp2/1.53.0"]
     PCRE:       ["pcre/8.45"]
     PNG:        ["libpng/1.6.39"]
-    PROTOBUF:   ["protobuf/3.21.4"]
-    SQLITE3:    ["sqlite3/3.41.1"]
-    TIFF:       ["libtiff/4.4.0"]
-    XML:        ["libxml2/2.10.3"]
+    SQLITE3:    ["sqlite3/3.42.0"]
+    TIFF:       ["libtiff/4.5.0"]
+    XML:        ["libxml2/2.11.4"]
     XSLT:       ["libxslt/1.1.34"]
-    UV:         ["libuv/1.44.2"]
+    UV:         ["libuv/1.45.0"]
     Z:          ["zlib/1.2.13"]
-    ZSTD:       ["zstd/1.5.4"]
+    ZSTD:       ["zstd/1.5.5"]
 
 internal-requirements:
     FASTCGI:   ["ncbi-fastcgi/2.4.2"]
