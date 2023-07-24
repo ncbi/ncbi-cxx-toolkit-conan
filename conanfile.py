@@ -54,10 +54,6 @@ class NcbiCxxToolkit(ConanFile):
         }
 
     @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
     def _dependencies_folder(self):
         return "dependencies"
 
@@ -135,7 +131,7 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def layout(self):
-        cmake_layout(self, src_folder = self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
 #----------------------------------------------------------------------------
     def requirements(self):
