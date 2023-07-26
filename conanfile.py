@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.scm import Version
+from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
 import yaml
@@ -201,7 +201,29 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+#        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        src_found = False;
+        print("getting Toolkit sources...")
+        tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
+        tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
+        tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "main"
+
+        if tk_url != "":
+            print("from url: " + tk_url)
+            get(self, tk_url, strip_root = True)
+            src_found = True;
+
+        if not src_found and tk_git != "":
+            print("from git: " + tk_git + "/" + tk_branch)
+            try:
+                git = Git(self)
+                git.clone(tk_git, target = ".", args = ["--single-branch", "--branch", tk_branch, "--depth", "1"])
+                src_found = True;
+            except Exception:
+                print("git failed")
+
+        if not src_found:
+            raise ConanException("Failed to find the Toolkit sources")
         apply_conandata_patches(self)
         root = os.path.join(os.getcwd(), "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
