@@ -21,22 +21,7 @@ requirements:
     Z:          ["zlib/1.2.13"]
     ZSTD:       ["zstd/1.5.5"]
 
-internal-requirements:
-    FASTCGI:   ["ncbi-fastcgi/2.4.2"]
-    VDB:       ["ncbi-vdb/3.0.1"]
-
 disabled:
     BACKWARD:   ["Windows", "Macos"]
     UNWIND:     ["Windows", "Macos"]
     BerkeleyDB: ["Windows"]
-    FASTCGI:    ["Windows", "Macos"]
-
-options:
-    grpc:
-        cpp_plugin: True
-        csharp_plugin: False
-        node_plugin: False
-        objective_c_plugin: False
-        php_plugin: False
-        python_plugin: False
-        ruby_plugin: False

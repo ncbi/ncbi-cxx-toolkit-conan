@@ -195,6 +195,7 @@ requirements:
   ximage:       ["Z", "JPEG", "PNG", "GIF", "TIFF"]
   xmlwrapp:     ["XML", "XSLT"]
   xncbi:        ["BACKWARD", "UNWIND"]
+  xconnext:     ["NCBICRYPT"]
   xxconnect2:   ["UV", "NGHTTP2"]
   xfcgi:        ["FASTCGI"]
 #----------------------------------------------------------------------------
