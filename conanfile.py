@@ -7,6 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
 import yaml
+
 required_conan_version = ">=1.53.0"
 
 
@@ -164,9 +165,8 @@ class NcbiCxxToolkit(ConanFile):
 
         if len(_required_components) == 0:
             _required_components.update( self._tk_dependencies["components"])
-        else:
-            for component in _required_components:
-                self._componenttargets.update(self._tk_dependencies["libraries"][component])
+        for component in _required_components:
+            self._componenttargets.update(self._tk_dependencies["libraries"][component])
 
         requirements = set()
         for component in _required_components:
@@ -245,7 +245,7 @@ class NcbiCxxToolkit(ConanFile):
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         with open(impfile, "r", encoding="utf-8") as f:
-            allexports = set(f.read().split())
+            allexports = set(f.read().split()).intersection(self._componenttargets)
         absent = []
         for component in self._tk_dependencies["components"]:
             c_libs = []
