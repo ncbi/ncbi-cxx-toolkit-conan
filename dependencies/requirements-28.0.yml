@@ -10,7 +10,7 @@ requirements:
     JPEG:       ["libjpeg/9e"]
     LMDB:       ["lmdb/0.9.29"]
     LZO:        ["lzo/2.10"]
-    NGHTTP2:    ["libnghttp2/1.53.0"]
+    NGHTTP2:    ["libnghttp2/1.54.0"]
     PCRE:       ["pcre/8.45"]
     PNG:        ["libpng/1.6.39"]
     SQLITE3:    ["sqlite3/3.42.0"]
