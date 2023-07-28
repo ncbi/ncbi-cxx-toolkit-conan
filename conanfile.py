@@ -190,7 +190,7 @@ class NcbiCxxToolkit(ConanFile):
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
             check_min_vs(self, 192)
-            if self.options.shared and is_msvc_static_runtime(self):
+            if self.options.shared and is_msvc_static_runtime(self) and Version(self.version) < "28":
                 raise ConanInvalidConfiguration("This configuration is not supported")
         else:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
