@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
@@ -7,6 +7,7 @@ from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 import os
 import yaml
+import re
 
 required_conan_version = ">=1.53.0"
 
@@ -90,6 +91,8 @@ class NcbiCxxToolkit(ConanFile):
     def _translate_req(self, key):
         if "Boost" in key:
             key = "Boost"
+        if key == "BerkeleyDB" and conan_version.major > "1":
+            return None
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
                 return None
@@ -139,11 +142,13 @@ class NcbiCxxToolkit(ConanFile):
         _alltargets = self._parse_option(self.options.with_targets)
         _required_components = set()
         for _t in _alltargets:
+            _re = re.compile(_t)
             for _component in self._tk_dependencies["components"]:
                 _libraries = self._tk_dependencies["libraries"][_component]
-                if _t in _libraries:
-                    _required_components.add(_component)
-                    break
+                for _lib in _libraries:
+                    if _re.match(_lib) != None:
+                        _required_components.add(_component)
+                        break
 
         _allcomponents = self._parse_option(self.options.with_components)
         _required_components.update(_allcomponents)
@@ -177,7 +182,7 @@ class NcbiCxxToolkit(ConanFile):
 
         for req in requirements:
             pkgs = self._translate_req(req)
-            if pkgs is not None:
+            if pkgs != None:
                 for pkg in pkgs:
                     print("Package requires ", pkg)
                     self.requires(pkg)
@@ -264,6 +269,10 @@ class NcbiCxxToolkit(ConanFile):
         cmake.install()
 
 #----------------------------------------------------------------------------
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("res", "build-system", "cmake", "CMake.NCBIpkg.conan.cmake")
+
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         with open(impfile, "r", encoding="utf-8") as f:
@@ -294,7 +303,7 @@ class NcbiCxxToolkit(ConanFile):
                     n_reqs.update(self._tk_dependencies["requirements"][lib])
             for req in n_reqs:
                 pkgs = self._translate_req(req)
-                if pkgs is not None:
+                if pkgs != None:
                     for pkg in pkgs:
                         pkg = pkg[:pkg.find("/")]
                         ref = pkg + "::" + pkg
@@ -325,4 +334,6 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         self.cpp_info.components["core"].builddirs.append("res")
-        self.cpp_info.components["core"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
+        build_modules = [self._module_file_rel_path]
+        self.cpp_info.components["core"].build_modules = build_modules
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
