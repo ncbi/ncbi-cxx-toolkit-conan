@@ -91,8 +91,6 @@ class NcbiCxxToolkit(ConanFile):
     def _translate_req(self, key):
         if "Boost" in key:
             key = "Boost"
-        if key == "BerkeleyDB" and conan_version.major > "1":
-            return None
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
                 return None
@@ -225,12 +223,12 @@ class NcbiCxxToolkit(ConanFile):
                 git.clone(tk_git, target = ".", args = ["--single-branch", "--branch", tk_branch, "--depth", "1"])
                 src_found = True;
             except Exception:
-                print("git failed")
+                print("git failed: ", exc)
 
         if not src_found:
             raise ConanException("Failed to find the Toolkit sources")
         apply_conandata_patches(self)
-        root = os.path.join(os.getcwd(), "CMakeLists.txt")
+        root = os.path.join(self.source_folder, "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
             f.write("project(ncbi-cpp)\n")
