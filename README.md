@@ -32,13 +32,11 @@ then the Toolkit itself. It is not always clear what exactly is required. Conan'
 
 First, you need Conan (and, to install Conan, you need Python). For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/en/latest/installation.html). Note that Conan evolves, recipes change. As of March 2023, you need at least version 1.53.
 
-On February 22, 2023 Conan 2.0 was released. It is a major upgrade, which features new public API, new build system integration and new graph model to represent relations between packages. What is important is that it is not always backward compatible with Conan 1.X.
+On February 22, 2023 Conan 2.0 was released. It is a major upgrade, which features new public API, new build system integration and new graph model to represent relations between packages. The Toolkit recipe is fully compatible both with Conan 1.X and 2.0.
 
-The Toolkit recipe is fully compatible both with Conan 1.X and 2.0, but some of the dependent packages are not. Sure, over time, things will change and those recipes will be fixed.
+Install Conan v1.61.0:
 
-Install Conan v1.59.0:
-
-    pip install conan==1.59.0
+    pip install conan==1.61.0
 
 If needed, upgrade Conan installation:
 
@@ -70,12 +68,13 @@ Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export . 27.0.0@_/_
+    conan export . 28.0.0@_/_
 
 NCBI C++ Toolkit versions:
 
 - 0.0.0  - most recent source code from [GitHub/master](https://github.com/ncbi/ncbi-cxx-toolkit-public)
-- 27.0.0 - The Toolkit v27.0 from [GitHub](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases/tag/release-27.0.0)
+- 27.0.0 - The Toolkit v27.0.0 from [GitHub](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases/tag/release-27.0.0)
+- 28.0.0 - The Toolkit v28.0.0 from [GitHub](https://github.com/ncbi/ncbi-cxx-toolkit-public/releases/tag/release-28.0.0)
 
 
 <a name="recipe_Build"></a>
@@ -87,7 +86,7 @@ What we know for sure is that we need *blastinput* library.
 Copy *blast_demo.cpp* into a local directory. Next to it, create *conanfile.txt*:
 
     [requires]
-    ncbi-cxx-toolkit-public/27.0.0
+    ncbi-cxx-toolkit-public/28.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     [generators]
@@ -132,7 +131,7 @@ You can request desired options in conanfile.txt. For example, the following ins
 shared libraries:
 
     [requires]
-    ncbi-cxx-toolkit-public/27.0.0
+    ncbi-cxx-toolkit-public/28.0.0
     [options]
     ncbi-cxx-toolkit-public:with_targets=blastinput
     ncbi-cxx-toolkit-public:shared=True
@@ -200,7 +199,7 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt can request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/27.0.0
+    ncbi-cxx-toolkit-public/28.0.0
     protobuf/3.21.4
     grpc/1.50.1
 
