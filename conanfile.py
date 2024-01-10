@@ -26,14 +26,12 @@ class NcbiCxxToolkit(ConanFile):
     options = {
         "shared":     [True, False],
         "fPIC":       [True, False],
-        "with_projects": ["ANY"],
         "with_targets":  ["ANY"],
         "with_components": ["ANY"]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
-        "with_projects":  "",
         "with_targets":   "",
         "with_components": ""
     }
@@ -241,13 +239,14 @@ class NcbiCxxToolkit(ConanFile):
         tc.variables["NCBI_PTBCFG_PACKAGING"] = True
         if self.options.shared:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
-        tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = str(self.options.with_projects) + ";-app/netcache"
+        tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
         if self.options.with_targets != "":
             tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
         if len(self._componenttargets) != 0:
             tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
+        tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
         tc.generate()
         cmdep = CMakeDeps(self)
         cmdep.generate()
