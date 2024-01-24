@@ -62,7 +62,7 @@ libraries:
             ]
   core:     ["xconnext",
              "ncbi_core",
-                "xconnserv","xcompress","xthrserv","sequtil","xconnect",
+                "xconnserv","xcompress","zcf","xthrserv","sequtil","xconnect",
                 "xdiff","xqueryparse","xregexp","xser","xutil","tables","xncbi",
              "xxconnect2"
             ]
@@ -148,7 +148,7 @@ libraries:
                 "seqtest","taxon1","taxon3","variation","seqset","seq","seqedit","submit",
                 "blastxml","blastxml2","seqcode",
              "ncbi_pub",
-                "mlacli","mla","medlars","pub","pubmed","medline","biblio",
+                "medlars","pub","pubmed","medline","biblio",
              "ncbi_general",
                 "generalasn",
              "efetch"
