@@ -1,10 +1,11 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.build import check_min_cppstd, cross_building, can_run
 from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 import yaml
 import re
@@ -209,18 +210,21 @@ class NcbiCxxToolkit(ConanFile):
         tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
         tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "main"
 
-        if tk_url != "":
+        if tk_url != None and tk_url != "":
             print("from url: " + tk_url)
-            get(self, tk_url, strip_root = True)
-            src_found = True;
+            try:
+                get(self, tk_url, strip_root = True)
+                src_found = True;
+            except Exception as exc:
+                print("url failed: ", exc)
 
-        if not src_found and tk_git != "":
+        if not src_found and tk_git != None and tk_git != "":
             print("from git: " + tk_git + "/" + tk_branch)
             try:
                 git = Git(self)
                 git.clone(tk_git, target = ".", args = ["--single-branch", "--branch", tk_branch, "--depth", "1"])
                 src_found = True;
-            except Exception:
+            except Exception as exc:
                 print("git failed: ", exc)
 
         if not src_found:
@@ -248,16 +252,34 @@ class NcbiCxxToolkit(ConanFile):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
         tc.generate()
-        cmdep = CMakeDeps(self)
-        cmdep.generate()
+        CMakeDeps(self).generate()
+        VirtualBuildEnv(self).generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
+
+#----------------------------------------------------------------------------
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if self.settings.os == "Macos":
+            grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
+            replace_in_file(self, grpc,
+                "COMMAND ${_cmd}",
+                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
+        root = os.path.join(self.source_folder, "CMakeLists.txt")
+        with open(root, "w", encoding="utf-8") as f:
+            f.write("cmake_minimum_required(VERSION 3.15)\n")
+            f.write("project(ncbi-cpp)\n")
+            f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
+            f.write("add_subdirectory(src)\n")
 
 #----------------------------------------------------------------------------
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
 # Visual Studio sometimes runs "out of heap space"
-        if is_msvc(self):
-            cmake.parallel = False
+#        if is_msvc(self):
+#            cmake.parallel = False
         cmake.build()
 
 #----------------------------------------------------------------------------
