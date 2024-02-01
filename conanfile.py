@@ -229,13 +229,6 @@ class NcbiCxxToolkit(ConanFile):
 
         if not src_found:
             raise ConanException("Failed to find the Toolkit sources")
-        apply_conandata_patches(self)
-        root = os.path.join(self.source_folder, "CMakeLists.txt")
-        with open(root, "w", encoding="utf-8") as f:
-            f.write("cmake_minimum_required(VERSION 3.15)\n")
-            f.write("project(ncbi-cpp)\n")
-            f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
-            f.write("add_subdirectory(src)\n")
 
 #----------------------------------------------------------------------------
     def generate(self):
