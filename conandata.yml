@@ -14,6 +14,9 @@ sources:
   "28.0.2":
     url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.2.tar.gz"
     sha256: "857f0d7b20939810c160ee67ec0d13e832d8371c419b1e23455c8fa73af16793"
+  "28.0.3":
+    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.3.tar.gz"
+    sha256: "070ba25981a77b9fd1bdb261c3f51f7819ea73dca99fa77a9ef806e252ab4367"
 
 patches:
   "27.0.0":
