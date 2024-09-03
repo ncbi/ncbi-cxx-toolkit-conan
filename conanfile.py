@@ -248,16 +248,22 @@ class NcbiCxxToolkit(ConanFile):
         CMakeDeps(self).generate()
         VirtualBuildEnv(self).generate()
         if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
+            VirtualRunEnv(self).generate()
 
 #----------------------------------------------------------------------------
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.settings.os == "Macos":
+        ver = Version(self.version).major
+        if ver < 29 and ver > 1:
             grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
-            replace_in_file(self, grpc,
-                "COMMAND ${_cmd}",
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
+            if self.settings.os == "Macos":
+                replace_in_file(self, grpc,
+                    "COMMAND ${_cmd}",
+                    "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
+            elif self.settings.os == "Linux":
+                replace_in_file(self, grpc,
+                    "COMMAND ${_cmd}",
+                    "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
         root = os.path.join(self.source_folder, "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
@@ -347,5 +353,6 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         self.cpp_info.components["core"].builddirs.append("res")
         build_modules = [self._module_file_rel_path]
-        self.cpp_info.components["core"].build_modules = build_modules
+        self.cpp_info.components["core"].build_modules["cmake_find_package"] = build_modules
+        self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = build_modules
         self.cpp_info.set_property("cmake_build_modules", build_modules)
