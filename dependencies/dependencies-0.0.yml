@@ -37,7 +37,8 @@ libraries:
                   "xblastformat","xblast","xalgoblastdbindex","xalgodustmask",
                   "xalgoseqqa","xalgognomon","xalgophytree","xalgosegmask",
                   "xalgoseq","xalgotext","xalgowinmask","composition_adjustment",
-                  "fastme","utrtprof"
+                  "fastme","xid_mapper",
+             "utrtprof"
             ]
   algo-ms:  ["ncbi_algo_ms",
                 "xomssa","omssa","pepXML"
@@ -60,15 +61,15 @@ libraries:
              "xalgoblastdbindex_search",
              "gumbelparams"
             ]
-  core:     ["xconnext",
+  core:     ["xconnext", "xalgovmerge",
              "ncbi_core",
-                "xconnserv","xcompress","zcf","xthrserv","sequtil","xconnect",
+                "xconnserv","xcompress","xthrserv","sequtil","xconnect",
                 "xdiff","xqueryparse","xregexp","xser","xutil","tables","xncbi",
-             "xxconnect2"
+             "xxconnect2", "zcf"
             ]
   dbapi:    ["sdbapi",
-             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds100",
-             "ct_ftds100","tds_ftds100",
+             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14",
+             "ct_ftds14", "tds_ftds14",
              "ncbi_dbapi",
                 "dbapi",
              "dbapi_util_blobstore",
@@ -156,20 +157,19 @@ libraries:
   psg-client:   ["psg_client",
                  "psg_protobuf"
                 ]
-  seqext:   ["gene_info_writer",
-             "ncbi_validator",
+  seqext:   ["ncbi_validator",
                 "xvalidate",
              "ncbi_xdiscrepancy",
                 "xdiscrepancy",
              "ncbi_seqext",
-                "blast_services","blastdb_format","gene_info","id1cli","id1","id2cli","id2",
+                "blast_services","blastdb_format","id1cli","id1","id2cli","id2",
                 "id2_split","writedb","seqdb","seqmasks_io","seqsplit","snputil","uudutil",
                 "valerr","valid","variation_utils","xformat","xalnmgr","xcleanup", "xhugeasn",
                 "xobjedit","xobjreadex","xobjwrite","xobjread","xlogging","xobjimport",
                 "xobjmanip","xunittestutil","xobjutil","xobjmgr",
             ]
   sqlitewrapp:  ["sqlitewrapp"]
-  sraread:  ["sraread"]
+  sraread:  ["srareadx", "sraread"]
   xmlwrapp: ["xmlreaders",
              "xmlwrapp"
             ]
