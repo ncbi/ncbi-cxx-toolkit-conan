@@ -39,6 +39,8 @@ class NcbiCxxToolkit(ConanFile):
     short_paths = True
     _dependencies = None
     _requirements = None
+    _targets = set()
+    _components = set()
     _componenttargets = set()
 
 #----------------------------------------------------------------------------
@@ -136,42 +138,44 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def requirements(self):
-        _alltargets = self._parse_option(self.options.with_targets)
-        _required_components = set()
-        for _t in _alltargets:
+        self._targets = self._parse_option(self.options.with_targets)
+        self._components = set()
+        for _t in self._targets:
             _re = re.compile(_t)
             for _component in self._tk_dependencies["components"]:
                 _libraries = self._tk_dependencies["libraries"][_component]
                 for _lib in _libraries:
                     if _re.match(_lib) != None:
-                        _required_components.add(_component)
+                        self._components.add(_component)
                         break
 
         _allcomponents = self._parse_option(self.options.with_components)
-        _required_components.update(_allcomponents)
+        for component in _allcomponents:
+            self._targets.update(self._tk_dependencies["libraries"][component])
+        self._components.update(_allcomponents)
 
-        if len(_required_components) > 0:
-            _todo = _required_components.copy()
-            _required_components.clear()
+        if len(self._components) > 0:
+            _todo = self._components.copy()
+            self._components.clear()
             _next = set()
             while len(_todo) > 0:
                 for _component in _todo:
-                    if not _component in _required_components:
-                        _required_components.add(_component)
+                    if not _component in self._components:
+                        self._components.add(_component)
                         if _component in self._tk_dependencies["dependencies"].keys():
                             for _n in self._tk_dependencies["dependencies"][_component]:
-                                if not _n in _required_components:
+                                if not _n in self._components:
                                     _next.add(_n)
                 _todo = _next.copy()
                 _next.clear()
 
-        if len(_required_components) == 0:
-            _required_components.update( self._tk_dependencies["components"])
-        for component in _required_components:
+        if len(self._components) == 0:
+            self._components.update( self._tk_dependencies["components"])
+        for component in self._components:
             self._componenttargets.update(self._tk_dependencies["libraries"][component])
 
         requirements = set()
-        for component in _required_components:
+        for component in self._components:
             libraries = self._tk_dependencies["libraries"][component]
             for lib in libraries:
                 if lib in self._tk_dependencies["requirements"].keys():
@@ -237,10 +241,7 @@ class NcbiCxxToolkit(ConanFile):
         if self.options.shared:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
-        if self.options.with_targets != "":
-            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        if len(self._componenttargets) != 0:
-            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
+        tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._targets if len(self._targets) != 0 else self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
@@ -295,30 +296,17 @@ class NcbiCxxToolkit(ConanFile):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         with open(impfile, "r", encoding="utf-8") as f:
             allexports = set(f.read().split()).intersection(self._componenttargets)
-        absent = []
-        for component in self._tk_dependencies["components"]:
-            c_libs = []
-            libraries = self._tk_dependencies["libraries"][component]
-            for lib in libraries:
-                if lib in allexports:
-                    c_libs.append(lib)
-            if len(c_libs) == 0 and len(libraries) != 0:
-                absent.append(component)
-        for component in self._tk_dependencies["components"]:
+        for component in self._components:
             c_libs = []
             c_reqs = []
             n_reqs = set()
-            c_deps = self._tk_dependencies["dependencies"][component]
-            for c in c_deps:
-                if c in absent:
-                    c_deps.remove(c)
-            c_reqs.extend(c_deps)
             libraries = self._tk_dependencies["libraries"][component]
             for lib in libraries:
                 if lib in allexports:
                     c_libs.append(lib)
                 if lib in self._tk_dependencies["requirements"].keys():
                     n_reqs.update(self._tk_dependencies["requirements"][lib])
+            c_reqs.extend(self._tk_dependencies["dependencies"][component])
             for req in n_reqs:
                 pkgs = self._translate_req(req)
                 if pkgs != None:
@@ -326,9 +314,8 @@ class NcbiCxxToolkit(ConanFile):
                         pkg = pkg[:pkg.find("/")]
                         ref = pkg + "::" + pkg
                         c_reqs.append(ref)
-            if len(c_libs) != 0 or (len(libraries) == 0 and len(c_reqs) != 0):
-                self.cpp_info.components[component].libs = c_libs
-                self.cpp_info.components[component].requires = c_reqs
+            self.cpp_info.components[component].libs = c_libs
+            self.cpp_info.components[component].requires = c_reqs
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].defines.append("_UNICODE")
