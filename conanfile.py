@@ -88,6 +88,10 @@ class NcbiCxxToolkit(ConanFile):
                 self._requirements = yaml.safe_load(f)
         return self._requirements
 
+    def _version_less(self, major):
+        ver = Version(self.version).major
+        return ver < major and ver > 1
+
 #----------------------------------------------------------------------------
     def _translate_req(self, key):
         if "Boost" in key:
@@ -196,7 +200,9 @@ class NcbiCxxToolkit(ConanFile):
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
             check_min_vs(self, 192)
-            if self.options.shared and is_msvc_static_runtime(self) and Version(self.version) < "28":
+            if self._version_less(28) and self.options.shared and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("This configuration is not supported")
+            if self._version_less(29) and int(str(self.settings.compiler.version)) > 193:
                 raise ConanInvalidConfiguration("This configuration is not supported")
         else:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -249,18 +255,20 @@ class NcbiCxxToolkit(ConanFile):
         CMakeDeps(self).generate()
         VirtualBuildEnv(self).generate()
         if can_run(self):
-            VirtualRunEnv(self).generate()
+            VirtualRunEnv(self).generate(scope = "build" if self._version_less(29) else "run")
 
 #----------------------------------------------------------------------------
     def _patch_sources(self):
         apply_conandata_patches(self)
-        ver = Version(self.version).major
-        if ver < 29 and ver > 1:
+        if self._version_less(29):
             grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
             if self.settings.os == "Macos":
                 replace_in_file(self, grpc,
                     "COMMAND ${_cmd}",
-                    "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
+                    "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}", strict=False)
+                pkg = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIComponentsPackage.cmake")
+                replace_in_file(self, pkg,"NCBI_util_disable_find_use_path()","#NCBI_util_disable_find_use_path()", strict=False)
+                replace_in_file(self, pkg,"NCBI_util_enable_find_use_path()","#NCBI_util_enable_find_use_path()", strict=False)
             elif self.settings.os == "Linux":
                 replace_in_file(self, grpc,
                     "COMMAND ${_cmd}",
