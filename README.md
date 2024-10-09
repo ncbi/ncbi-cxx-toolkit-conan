@@ -69,7 +69,7 @@ Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export . 28.0.0@_/_
+    conan export . --version 28.0.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
