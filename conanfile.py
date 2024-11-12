@@ -217,13 +217,14 @@ class NcbiCxxToolkit(ConanFile):
         src_found = False;
         print("getting Toolkit sources...")
         tk_url = self.conan_data["sources"][self.version]["url"] if "url" in self.conan_data["sources"][self.version].keys() else ""
+        tk_checksum = self.conan_data["sources"][self.version]["sha256"] if "url" in self.conan_data["sources"][self.version].keys() else None
         tk_git = self.conan_data["sources"][self.version]["git"] if "git" in self.conan_data["sources"][self.version].keys() else ""
         tk_branch = self.conan_data["sources"][self.version]["branch"] if "branch" in self.conan_data["sources"][self.version].keys() else "main"
 
         if tk_url != None and tk_url != "":
             print("from url: " + tk_url)
             try:
-                get(self, tk_url, strip_root = True)
+                get(self, tk_url, sha256 = tk_checksum, strip_root = True)
                 src_found = True;
             except Exception as exc:
                 print("url failed: ", exc)
