@@ -141,6 +141,23 @@ class NcbiCxxToolkit(ConanFile):
         cmake_layout(self, src_folder="src")
 
 #----------------------------------------------------------------------------
+    def _collect_dependencies(self, components):
+        if len(components) > 0:
+            _todo = components.copy()
+            components.clear()
+            _next = set()
+            while len(_todo) > 0:
+                for _component in _todo:
+                    if not _component in components:
+                        components.add(_component)
+                        if _component in self._tk_dependencies["dependencies"].keys():
+                            for _n in self._tk_dependencies["dependencies"][_component]:
+                                if not _n in components:
+                                    _next.add(_n)
+                _todo = _next.copy()
+                _next.clear()
+
+
     def requirements(self):
         self._targets = self._parse_option(self.options.with_targets)
         self._components = set()
@@ -153,31 +170,21 @@ class NcbiCxxToolkit(ConanFile):
                         self._components.add(_component)
                         break
 
-        _allcomponents = self._parse_option(self.options.with_components)
-        for component in _allcomponents:
-            self._targets.update(self._tk_dependencies["libraries"][component])
-        self._components.update(_allcomponents)
+        _requested_components = self._parse_option(self.options.with_components)
+        self._collect_dependencies(_requested_components)
 
-        if len(self._components) > 0:
-            _todo = self._components.copy()
-            self._components.clear()
-            _next = set()
-            while len(_todo) > 0:
-                for _component in _todo:
-                    if not _component in self._components:
-                        self._components.add(_component)
-                        if _component in self._tk_dependencies["dependencies"].keys():
-                            for _n in self._tk_dependencies["dependencies"][_component]:
-                                if not _n in self._components:
-                                    _next.add(_n)
-                _todo = _next.copy()
-                _next.clear()
+        if len(self._components) == 0 and len(_requested_components) == 0:
+            _requested_components.update( self._tk_dependencies["components"])
 
-        if len(self._components) == 0:
-            self._components.update( self._tk_dependencies["components"])
-        for component in self._components:
-            self._componenttargets.update(self._tk_dependencies["libraries"][component])
+        if len(_requested_components) > 0:
+            for component in _requested_components:
+                self._componenttargets.update(self._tk_dependencies["libraries"][component])
+            if len(self._targets) > 0:
+                self._componenttargets.update(self._targets)
+                self._targets.clear()
+            self._components.update(_requested_components)
 
+        self._collect_dependencies(self._components)
         requirements = set()
         for component in self._components:
             libraries = self._tk_dependencies["libraries"][component]
@@ -248,7 +255,10 @@ class NcbiCxxToolkit(ConanFile):
         if self.options.shared:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
-        tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._targets if len(self._targets) != 0 else self._componenttargets)
+        if len(self._targets) > 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = ";".join(self._targets)
+        else:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
@@ -304,7 +314,7 @@ class NcbiCxxToolkit(ConanFile):
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         with open(impfile, "r", encoding="utf-8") as f:
-            allexports = set(f.read().split()).intersection(self._componenttargets)
+            allexports = set(f.read().split())
         for component in self._components:
             c_libs = []
             c_reqs = []
