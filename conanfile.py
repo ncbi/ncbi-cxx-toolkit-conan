@@ -28,13 +28,15 @@ class NcbiCxxToolkit(ConanFile):
         "shared":     [True, False],
         "fPIC":       [True, False],
         "with_targets":  ["ANY"],
-        "with_components": ["ANY"]
+        "with_components": ["ANY"],
+        "without_req": ["ANY"]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
         "with_targets":   "",
-        "with_components": ""
+        "with_components": "",
+	"without_req": ""
     }
     short_paths = True
     _dependencies = None
@@ -96,6 +98,9 @@ class NcbiCxxToolkit(ConanFile):
     def _translate_req(self, key):
         if "Boost" in key:
             key = "Boost"
+        _disabled_req = self._parse_option(self.options.without_req)
+        if key in _disabled_req:
+            return None
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
                 return None
@@ -262,6 +267,9 @@ class NcbiCxxToolkit(ConanFile):
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
+        _disabled_req = self._parse_option(self.options.without_req)
+        if len(_disabled_req) > 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTS"] = "-" + ";-".join(_disabled_req)
         tc.generate()
         CMakeDeps(self).generate()
         VirtualBuildEnv(self).generate()
