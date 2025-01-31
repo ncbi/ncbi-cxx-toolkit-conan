@@ -1,4 +1,4 @@
-version: 0.0
+version: 29.0
 #----------------------------------------------------------------------------
 requirements:
     BACKWARD:   ["backward-cpp/1.6"]
@@ -25,4 +25,4 @@ requirements:
 disabled:
     BACKWARD:   ["Windows", "Macos"]
     UNWIND:     ["Windows", "Macos"]
-    BerkeleyDB: ["Windows"]
+    BerkeleyDB: ["Windows", "Macos"]
