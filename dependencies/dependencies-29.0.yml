@@ -72,12 +72,12 @@ libraries:
             ]
   dbapi:    ["sdbapi",
              "dbapi_util_blobstore",
-             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14",
+             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14","ncbi_xdbapi_ftds100",
              "ncbi_dbapi",
                 "dbapi",
              "ncbi_dbapi_driver",
                 "dbapi_driver",
-             "ct_ftds14", "tds_ftds14"
+             "ct_ftds14", "tds_ftds14","ct_ftds100", "tds_ftds100"
             ]
   eutils:   ["eutils_client",
              "ncbi_eutils",
