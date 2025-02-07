@@ -12,7 +12,7 @@ requirements:
     LZO:        ["lzo/2.10"]
     NGHTTP2:    ["libnghttp2/[>=1.51.0 <=1.61.0]"]
     PCRE:       ["pcre/8.45"]
-    PCRE2:      ["pcre2/[>=10.42 <=10.44]"]
+    PCRE2:      ["pcre2/10.42"]
     PNG:        ["libpng/[>=1.6.37 <=1.6.44]"]
     SQLITE3:    ["sqlite3/[>=3.40.0 <=3.47.1]"]
     TIFF:       ["libtiff/[>=4.3.0 <=4.6.0]"]
