@@ -48,14 +48,17 @@ class NcbiCxxToolkit(ConanFile):
 #----------------------------------------------------------------------------
     @property
     def _min_cppstd(self):
-        return 17
+        if self._version_less(29):
+            return 17
+        else:
+            return 20
 
     @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
             "clang": "7",
-            "apple-clang": "10",
+            "apple-clang": "10"
         }
 
     @property
