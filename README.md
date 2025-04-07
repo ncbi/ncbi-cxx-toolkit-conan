@@ -13,7 +13,7 @@
 <a name="recipe_Conan"></a>
 ## What is Conan and why you might need it?
 
-[Conan](https://docs.conan.io/en/latest/) is an Open Source package manager for C and C++ development, 
+[Conan](https://docs.conan.io/2/) is an Open Source package manager for C and C++ development, 
 allowing development teams to easily and efficiently
 manage their packages and dependencies across platforms and build systems. Conan can manage any number of different 
 binaries for different build configurations, including different architectures, compilers, compiler versions, runtimes, 
@@ -40,9 +40,9 @@ Install Conan:
 
     pip install conan
 
-or
+or, to install a specific version:
 
-    pip install conan==2.8.0
+    pip install conan==2.13.0
 
 If needed, upgrade Conan installation:
 
@@ -50,9 +50,9 @@ If needed, upgrade Conan installation:
 
 Next, check the list of Conan repositories and add *center.conan.io*:
 
-    $ conan remote add conancenter https://center.conan.io
+    $ conan remote add conancenter https://center2.conan.io
     $ conan remote list
-    conancenter: https://center.conan.io [Verify SSL: True]
+    conancenter: https://center2.conan.io [Verify SSL: True]
 
 Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
@@ -65,11 +65,15 @@ Check the list of Conan [profiles](https://docs.conan.io/2/reference/commands/pr
     conan profile detect
     conan profile show
 
+Profiles can only be edited manually. Find profile location:
+
+    conan profile path default
+
 Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export . --version 28.0.0
+    conan export . --version 29.0.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
@@ -89,7 +93,7 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
         settings = "os", "compiler", "build_type", "arch"
         generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
         def requirements(self):
-            self.requires("ncbi-cxx-toolkit-public/[>=28]")
+            self.requires("ncbi-cxx-toolkit-public/[>=29]")
         def configure(self):
             self.options["ncbi-cxx-toolkit-public/*"].with_targets = "blastinput"
         def layout(self):
@@ -98,7 +102,7 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
 It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/conanfile_txt.html) - a simplified version of *conanfile.py*:
 
     [requires]
-    ncbi-cxx-toolkit-public/28.0.8
+    ncbi-cxx-toolkit-public/29.0.0
     [options]
     ncbi-cxx-toolkit-public/*:with_targets=blastinput
     [layout]
@@ -270,9 +274,9 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt may request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/28.0.8
-    protobuf/3.21.12
-    grpc/1.50.1
+    ncbi-cxx-toolkit-public/29.0.0
+    protobuf/5.27.0
+    grpc/1.67.1
 
 Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate_cpp*:
 
