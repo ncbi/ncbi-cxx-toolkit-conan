@@ -7,6 +7,7 @@ requirements:
     BZ2:        ["bzip2/1.0.8"]
     GIF:        ["giflib/[>=5.2.1 <=5.2.2]"]
     GRPC:       ["grpc/[>=1.50.1 <=1.67.1]", "protobuf/[>=3.21.12 <=5.27.0]"]
+    Iconv:      ["libiconv/[>=1.17]"]
     JPEG:       ["libjpeg/9e"]
     LMDB:       ["lmdb/[>=0.9.29 <=0.9.32]"]
     LZO:        ["lzo/2.10"]
