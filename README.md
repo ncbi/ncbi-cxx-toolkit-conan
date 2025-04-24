@@ -160,6 +160,25 @@ To configure Debug build, use *build_type* settings:
     cmake --preset conan-debug
     cmake --build --preset conan-debug
 
+Normally, defining build flags (compilation and linking) is the responsiblity of the user.
+Still, it is possible to request the Toolkit to set flags which were used by the Toolkit itself - by
+setting *NCBI_PTBCFG_NCBI_BUILD_FLAGS* variable before finding the package:
+
+    set(NCBI_PTBCFG_NCBI_BUILD_FLAGS ON)
+    find_package(ncbi-cxx-toolkit-core REQUIRED)
+
+In this case, it is also possible to request additional customizations by defining
+[*compilation features*](https://ncbi.github.io/cxx-toolkit/pages/ch_cmconfig#ch_cmconfig._Configure), for example:
+
+    set(NCBI_PTBCFG_NCBI_BUILD_FLAGS ON)
+    set(NCBI_PTBCFG_PROJECT_FEATURES MaxDebug)
+    find_package(ncbi-cxx-toolkit-core REQUIRED)
+
+Yet another option is using CTest framework provided by the Toolkit. Define *NCBI_PTBCFG_ADDTEST* variable:
+
+    set(NCBI_PTBCFG_ADDTEST ON)
+    find_package(ncbi-cxx-toolkit-core REQUIRED)
+
 
 <a name="recipe_Components"></a>
 ## Semantic components of the Toolkit.
