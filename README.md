@@ -329,7 +329,7 @@ For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as w
     NCBI_end_app()
 
 Note the use of *NCBIptb_setup()* function. It adds functionalty **required** by *NCBIptb*. It also gives a second chance to request
-NCBI-specific build flags, add compilation features and NCBI CTest framework. The function has the foloowing optional arguments:
+NCBI-specific build flags, add compilation features and NCBI CTest framework. The function has the following optional arguments:
 
 |Argument|Meaning|
 |--------|----------|
