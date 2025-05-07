@@ -67,11 +67,11 @@ class NcbiCxxToolkit(ConanFile):
 
     @property
     def _dependencies_filename(self):
-        return f"dependencies-{Version(self.version).major}.{Version(self.version).minor}.yml"
+        return f"dependencies-{Version(self.version).major}.0.yml"
 
     @property
     def _requirements_filename(self):
-        return f"requirements-{Version(self.version).major}.{Version(self.version).minor}.yml"
+        return f"requirements-{Version(self.version).major}.0.yml"
 
     @property
     def _tk_dependencies(self):
