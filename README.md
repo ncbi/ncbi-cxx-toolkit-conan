@@ -160,7 +160,7 @@ To configure Debug build, use *build_type* settings:
     cmake --preset conan-debug
     cmake --build --preset conan-debug
 
-Normally, defining build flags (compilation and linking) is the responsiblity of the user.
+Normally, defining build flags (compilation and linking) is the responsibility of the user.
 Still, it is possible to request the Toolkit to set flags which were used by the Toolkit itself - by
 setting *NCBI_PTBCFG_NCBI_BUILD_FLAGS* variable before finding the package:
 
@@ -328,7 +328,22 @@ For example, *CMakeLists.txt* for [blast_demo](#recipe_Build) project might as w
       NCBI_uses_toolkit_libraries(blastinput)
     NCBI_end_app()
 
-Note that *NCBIptb* expects source tree root to have *include* and *src* subdirectories:
+Note the use of *NCBIptb_setup()* function. It adds functionalty **required** by *NCBIptb*. It also gives a second chance to request
+NCBI-specific build flags, add compilation features and NCBI CTest framework. The function has the foloowing optional arguments:
+
+|Argument|Meaning|
+|--------|----------|
+|NCBI_BUILD_FLAGS | Set build flags which were used by the Toolkit itself |
+|NCBI_CTEST | Enable NCBI CTest framework provided by the Toolkit |
+|NCBI_LOCAL_COMPONENTS | In addition to Conan packages, look for locally defined 3rd party packages |
+|FEATURES list | List of additional [compilation features](https://ncbi.github.io/cxx-toolkit/pages/ch_cmconfig#ch_cmconfig._Configure) defined by the Toolkit |
+|COMPONENTS list | explicitly enable or disable listed [3rd party packages](https://ncbi.github.io/cxx-toolkit/pages/ch_cmconfig#ch_cmconfig._Configure) |
+
+For example:
+
+    NCBIptb_setup( NCBI_BUILD_FLAGS NCBI_CTEST FEATURES MaxDebug Coverage)
+
+*NCBIptb* expects source tree root to have *include* and *src* subdirectories:
 
     - root
         - include
