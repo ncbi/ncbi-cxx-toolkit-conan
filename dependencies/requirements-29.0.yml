@@ -5,6 +5,7 @@ requirements:
     UNWIND:     ["libunwind/[>=1.6.2 <=1.8.1]"]
     BerkeleyDB: ["libdb/5.3.28"]
     BZ2:        ["bzip2/1.0.8"]
+    CASSANDRA:  ["cassandra-cpp-driver/[>=2.15.3 <=2.17.1]"]
     GIF:        ["giflib/[>=5.2.1 <=5.2.2]"]
     GRPC:       ["grpc/[>=1.50.1 <=1.67.1]", "protobuf/[>=3.21.12 <=5.27.0]"]
     Iconv:      ["libiconv/[>=1.17]"]
@@ -27,3 +28,4 @@ disabled:
     BACKWARD:   ["Windows", "Macos"]
     UNWIND:     ["Windows", "Macos"]
     BerkeleyDB: ["Windows", "Macos"]
+    CASSANDRA:  ["Windows", "Macos"]

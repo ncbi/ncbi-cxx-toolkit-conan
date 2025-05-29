@@ -24,6 +24,7 @@ components:
   - loaders
   - objects
   - psg-client
+  - psg-server
   - seqext
   - sqlitewrapp
   - sraread
@@ -159,8 +160,9 @@ libraries:
              "ncbi_general",
                 "generalasn"
             ]
-  psg-client:   ["psg_client",
-                 "psg_protobuf"
+  psg-client:   ["psg_client"
+                ]
+  psg-server:   ["psg_cache", "psg_ipg", "psg_myncbi", "psg_cassandra", "psg_protobuf"
                 ]
   seqext:   ["ncbi_validator",
                 "xvalidate",
@@ -192,6 +194,7 @@ requirements:
   dbsnp_ptis:   ["GRPC"]
   grpc_integration: ["GRPC"]
   psg_protobuf: ["GRPC"]
+  psg_cassandra: ["CASSANDRA"]
   seqdb:        ["LMDB"]
   sqlitewrapp:  ["SQLITE3"]
   sraread:      ["VDB"]
@@ -231,6 +234,7 @@ dependencies:
   loaders:      ["loader-asncache", "loader-blastdb", "loader-genbank", "loader-lds2"]
   objects:      ["sqlitewrapp","core"]
   psg-client:   ["seqext"]
+  psg-server:   ["objects","xmlwrapp"]
   seqext:       ["eutils", "objects"]
   sqlitewrapp:  ["core"]
   sraread:      ["seqext"]
