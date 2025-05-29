@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
@@ -52,14 +52,6 @@ class NcbiCxxToolkit(ConanFile):
             return 17
         else:
             return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10"
-        }
 
     @property
     def _dependencies_folder(self):
@@ -205,7 +197,7 @@ class NcbiCxxToolkit(ConanFile):
             if pkgs != None:
                 for pkg in pkgs:
                     print("Package requires ", pkg)
-                    self.requires(pkg)
+                    self.requires(pkg, transitive_libs=True)
 
 #----------------------------------------------------------------------------
     def validate(self):
@@ -219,10 +211,6 @@ class NcbiCxxToolkit(ConanFile):
                 raise ConanInvalidConfiguration("This configuration is not supported")
             if self._version_less(29) and int(str(self.settings.compiler.version)) > 193:
                 raise ConanInvalidConfiguration("This configuration is not supported")
-        else:
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"This version of {self.settings.compiler} is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
