@@ -94,8 +94,6 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
         generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
         def requirements(self):
             self.requires("ncbi-cxx-toolkit-public/[>=29]")
-        def configure(self):
-            self.options["ncbi-cxx-toolkit-public/*"].with_targets = "blastinput"
         def layout(self):
             cmake_layout(self, src_folder=".")
 
@@ -103,8 +101,6 @@ It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/c
 
     [requires]
     ncbi-cxx-toolkit-public/29.0.0
-    [options]
-    ncbi-cxx-toolkit-public/*:with_targets=blastinput
     [layout]
     cmake_layout
     [generators]
@@ -115,14 +111,14 @@ It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/c
 It is difficult to say what is better, but *conanfile.py* definitely provides greater
 [flexibility](https://docs.conan.io/2/tutorial/consuming_packages/the_flexibility_of_conanfile_py.html)
 
-Add *CMakeLists.txt*:
+Add *CMakeLists.txt* (*blastinput* library is included into *blast* [component](#recipe_Components)):
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
     set(ncbitk ncbi-cxx-toolkit-public)
     find_package(${ncbitk} REQUIRED)
     add_executable(blast_demo blast_demo.cpp)
-    target_link_libraries(blast_demo ${ncbitk}::${ncbitk})
+    target_link_libraries(blast_demo ${ncbitk}::blast)
 
 Install build requirements, in the source directory run
 
