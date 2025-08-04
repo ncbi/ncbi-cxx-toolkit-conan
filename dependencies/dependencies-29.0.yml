@@ -64,7 +64,7 @@ libraries:
              "xalgoblastdbindex_search",
              "gumbelparams"
             ]
-  core:     ["xconnext","xxconnect2","xalgovmerge",
+  core:     ["xconnext","xxconnect2","xalgovmerge", "ncbi_xcache_netcache",
              "ncbi_core",
                 "xconnserv","xcompress","xthrserv","xregexp","xser",
                 "sequtil","xconnect","xdiff","xqueryparse","xutil",

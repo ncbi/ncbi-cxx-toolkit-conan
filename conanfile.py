@@ -192,12 +192,16 @@ class NcbiCxxToolkit(ConanFile):
                 if lib in self._tk_dependencies["requirements"].keys():
                     requirements.update(self._tk_dependencies["requirements"][lib])
 
+        _reqs = set()
         for req in requirements:
             pkgs = self._translate_req(req)
             if pkgs != None:
                 for pkg in pkgs:
-                    print("Package requires ", pkg)
-                    self.requires(pkg, transitive_libs=True)
+                    _reqs.add(pkg)
+
+        for pkg in _reqs:
+            print("Package requires ", pkg)
+            self.requires(pkg, transitive_libs=True)
 
 #----------------------------------------------------------------------------
     def validate(self):
