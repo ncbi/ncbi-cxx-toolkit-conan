@@ -36,7 +36,7 @@ class NcbiCxxToolkit(ConanFile):
         "fPIC":       True,
         "with_targets":   "",
         "with_components": "",
-	"without_req": ""
+        "without_req": ""
     }
     short_paths = True
     _dependencies = None
