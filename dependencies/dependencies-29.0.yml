@@ -175,7 +175,7 @@ libraries:
                 "xobjreadex","xobjimport","xunittestutil",
                 "id2cli","id2_split","snputil","uudutil","xhugeasn","xobjutil",
                 "xobjread","id2","id1cli","xobjmgr","id1","seqsplit","valerr",
-                "xobjmanip","valid","xlogging",
+                "xobjmanip","valid","xlogging"
             ]
   sqlitewrapp:  ["sqlitewrapp"]
   sraread:  ["srareadx", "sraread"]
