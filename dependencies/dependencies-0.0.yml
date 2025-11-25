@@ -175,7 +175,7 @@ libraries:
                 "xobjreadex","xobjimport","xunittestutil",
                 "id2cli","id2_split","snputil","uudutil","xhugeasn","xobjutil",
                 "xobjread","id2","id1cli","xobjmgr","id1","seqsplit","valerr",
-                "xobjmanip","valid","xlogging",
+                "xobjmanip","valid","xlogging"
             ]
   sqlitewrapp:  ["sqlitewrapp"]
   sraread:  ["srareadx", "sraread"]
@@ -193,8 +193,10 @@ requirements:
   blast_sra_input: ["VDB"]
   dbsnp_ptis:   ["GRPC"]
   grpc_integration: ["GRPC"]
-  psg_protobuf: ["GRPC"]
+  psg_cache:    ["LMDB"]
   psg_cassandra: ["CASSANDRA"]
+  psg_myncbi:   ["CURL"]
+  psg_protobuf: ["GRPC"]
   seqdb:        ["LMDB"]
   sqlitewrapp:  ["SQLITE3"]
   sraread:      ["VDB"]
@@ -202,7 +204,7 @@ requirements:
   vdb2blast:    ["VDB"]
   writedb:      ["LMDB"]
   xcompress:    ["Z", "BZ2", "LZO", "ZSTD"]
-  xregexp:      ["PCRE", "PCRE2"]
+  xregexp:      ["PCRE2"]
   ximage:       ["Z", "JPEG", "PNG", "GIF", "TIFF"]
   xmlwrapp:     ["XML", "XSLT"]
   xncbi:        ["BACKWARD", "UNWIND"]
