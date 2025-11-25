@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, trim_conandata
 from conan.tools.build import check_min_cppstd, cross_building, can_run
 from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
@@ -29,14 +29,16 @@ class NcbiCxxToolkit(ConanFile):
         "fPIC":       [True, False],
         "with_targets":  ["ANY"],
         "with_components": ["ANY"],
-        "without_req": ["ANY"]
+        "without_req": ["ANY"],
+        "with_composite": [True, False]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
         "with_targets":   "",
         "with_components": "",
-        "without_req": ""
+        "without_req": "",
+        "with_composite": False
     }
     short_paths = True
     _dependencies = None
@@ -116,6 +118,7 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def export(self):
+        trim_conandata(self)
         copy(self, self._dependencies_filename,
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
@@ -252,7 +255,7 @@ class NcbiCxxToolkit(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["NCBI_PTBCFG_PACKAGING"] = True
-        if self.options.shared:
+        if self.options.with_composite:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
         if len(self._targets) > 0:
