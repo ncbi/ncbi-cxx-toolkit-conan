@@ -10,6 +10,9 @@ class NcbiCxxToolkitTest(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def configure(self):
+        self.options["grpc/*"].secure = True
+
     def layout(self):
         cmake_layout(self)
 
