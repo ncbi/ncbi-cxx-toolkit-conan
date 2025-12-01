@@ -1,4 +1,7 @@
 sources:
+  "29.8.0":
+    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.8.0.tar.gz"
+    sha256: "a5e5a08f6028b68fd61b0fe28ecff8d55e4398a1156913b53efeef5bce848b0a"
   "29.7.0":
     url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.7.0.tar.gz"
     sha256: "44ea47f5f725568dadc5a149134d7e6be47a4b86f0c2a7ba5a9bc2a21bcc68a7"
