@@ -32,10 +32,6 @@ then the Toolkit itself. It is not always clear what exactly is required. Conan'
 
 First, you need Conan (and, to install Conan, you need Python). For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/2/installation.html).
 
-On February 22, 2023 Conan 2.0 was released. It is a major upgrade, which features new public API, new build system integration and new graph model to represent relations between packages. What is important is that it is not always backward compatible with Conan 1.X.
-
-The Toolkit recipe is fully compatible both with Conan 1.X and 2.X. We strongly recommend using Conan2.
-
 Install Conan:
 
     pip install conan
@@ -73,7 +69,7 @@ Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export . --version 29.0.0
+    conan export . --version 30.0.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
@@ -100,7 +96,7 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
 It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/conanfile_txt.html) - a simplified version of *conanfile.py*:
 
     [requires]
-    ncbi-cxx-toolkit-public/29.0.0
+    ncbi-cxx-toolkit-public/30.0.0
     [layout]
     cmake_layout
     [generators]
@@ -221,7 +217,8 @@ Here is the list of the Toolkit components:
 |loader-wgs| ncbi_xloader_vdbgraph ncbi_xloader_wgs|
 |loaders| data_loaders_util ncbi_xloader_patcher xflatfile|
 |objects| access biblio biotree blastdb blastxml blastxml2 cdd cn3d docsum efetch entrez2 entrez2cli entrezgene featdef gbproj gbseq gencoll_client generalasn genesbyloc genome_collection homologene insdseq local_taxon macro medlars medline mim mmdb ncbimime objcoords objprt pcassay pcassay2 pcsubstance proj pub pubmed remap remapcli scoremat searchbyrsid seq seqcode seqedit seqset seqtest submit taxon1 taxon3 tinyseq trackmgr trackmgrcli variation xnetblast xnetblastcli|
-|psg-client| psg_client psg_protobuf|
+|psg-client| psg_client|
+|psg-server| psg_cache psg_ipg psg_myncbi psg_cassandra psg_protobuf|
 |seqext| blast_services blastdb_format id1 id1cli id2 id2_split id2cli seqdb seqmasks_io seqsplit snputil uudutil valerr valid variation_utils writedb xalnmgr xcleanupxdiscrepancy xformat xhugeasn xlogging xobjedit xobjimport xobjmanip xobjmgr xobjread xobjreadex xobjutil xobjwrite xunittestutil xvalidate|
 |sqlitewrapp| sqlitewrapp|
 |sraread| sraread srareadx|
@@ -233,7 +230,7 @@ Here is the list of the Toolkit components:
 ## Supported 3rd party packages.
 
 The Toolkit uses a number of 3-rd party packages. In the Toolkit code they are known by their aliases.
-The following is the list of packages supported by *ncbi-cxx-toolkit-public* Conan recipe, as of October 2024:
+The following is the list of packages supported by *ncbi-cxx-toolkit-public* Conan recipe, as of January 2026:
 
 |Alias|Conan package|
 |--------|------------|
@@ -246,7 +243,7 @@ The following is the list of packages supported by *ncbi-cxx-toolkit-public* Con
 |LMDB|lmdb|
 |LZO|lzo|
 |NGHTTP2|libnghttp2|
-|PCRE|pcre|
+|PCRE2|pcre2|
 |PNG|libpng|
 |PROTOBUF|protobuf|
 |SQLITE3|sqlite3|
@@ -289,9 +286,9 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt may request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/29.0.0
+    ncbi-cxx-toolkit-public/30.0.0
     protobuf/5.27.0
-    grpc/1.67.1
+    grpc/1.72.0
 
 Next, you can use their own mechanisms, or the same NCBI function *NCBI_generate_cpp*:
 
