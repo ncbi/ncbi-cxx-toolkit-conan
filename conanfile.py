@@ -40,6 +40,7 @@ class NcbiCxxToolkit(ConanFile):
         "without_req": "",
         "with_composite": False
     }
+    exports_sources = "CMakeLists.txt"
     short_paths = True
     _dependencies = None
     _requirements = None
@@ -141,7 +142,7 @@ class NcbiCxxToolkit(ConanFile):
 
 #----------------------------------------------------------------------------
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
 #----------------------------------------------------------------------------
     def _collect_dependencies(self, components):
@@ -250,6 +251,7 @@ class NcbiCxxToolkit(ConanFile):
 
         if not src_found:
             raise ConanException("Failed to find the Toolkit sources")
+        self._patch_sources()
 
 #----------------------------------------------------------------------------
     def generate(self):
@@ -290,16 +292,9 @@ class NcbiCxxToolkit(ConanFile):
                 replace_in_file(self, grpc,
                     "COMMAND ${_cmd}",
                     "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
-        root = os.path.join(self.source_folder, "CMakeLists.txt")
-        with open(root, "w", encoding="utf-8") as f:
-            f.write("cmake_minimum_required(VERSION 3.15)\n")
-            f.write("project(ncbi-cpp)\n")
-            f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
-            f.write("add_subdirectory(src)\n")
 
 #----------------------------------------------------------------------------
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
 # Visual Studio sometimes runs "out of heap space"
