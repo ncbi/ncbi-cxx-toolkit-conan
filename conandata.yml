@@ -38,67 +38,9 @@ sources:
   "29.1.0":
     url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.1.0.tar.gz"
     sha256: "183871e7c96e69bb72f09b174037c909f99f785e510aa13d9e8e437513722e02"
-  "29.0.2":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.0.2.tar.gz"
-    sha256: "591997afe314e6570780af33ea86fe87eb1c8fa69a9a0b363c0675c36b51858a"
-  "29.0.1":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.0.1.tar.gz"
-    sha256: "504ac38917bc9d3a51d17ef504655c017e8353e0e7da145ae6c08a825cb5b77d"
-  "29.0.0":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release/29.0.0.tar.gz"
-    sha256: "acfc465a0d67bdcf2224ac15ff6605679084e57d6ec37fe52be906ff8fba8492"
-  "28.0.12":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.12.tar.gz"
-    sha256: "db8a21ca242480badce126a6cad6ed5a2a8bcf40427fe6ea0dfd1ce6e8755a33"
-  "28.0.11":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.11.tar.gz"
-    sha256: "a30a24221b2e4792b4cebb16654cbd1a72296d4aaadcfc54004a727e41ed03ae"
-  "28.0.10":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.10.tar.gz"
-    sha256: "8872120cc1ed9fed70676ff9ab2867c0423400f2dcdb78d98caf9459b8276adf"
-  "28.0.9":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.9.tar.gz"
-    sha256: "e0abcb54cfd0090b452aa09daed588579643a7f025ccf2ffc3592b39ecd4acdb"
-  "28.0.8":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.8.tar.gz"
-    sha256: "4561886175839f991c66d1008e35a5928073b2a3858ca2ef9de7e2797005af6d"
-  "28.0.7":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.7.tar.gz"
-    sha256: "92e926101809b1752357641a7f9b40d0dbee6e9d66f18fe76198020a58c8d172"
-  "28.0.6":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.6.tar.gz"
-    sha256: "bc0e16a566078fe09eee300b565fc4b4e239229aca67c56a006fa26451cccff7"
-  "28.0.5":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.5.tar.gz"
-    sha256: "293d9971c044919eb56c62081f44c05f2aecb33512720811e021811ee88379c7"
-  "28.0.4":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.4.tar.gz"
-    sha256: "2e4583e7dcb22415633fc5329b0ddca15367d5db79a25d04303e295340441505"
-  "28.0.3":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.3.tar.gz"
-    sha256: "070ba25981a77b9fd1bdb261c3f51f7819ea73dca99fa77a9ef806e252ab4367"
-  "28.0.2":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.2.tar.gz"
-    sha256: "857f0d7b20939810c160ee67ec0d13e832d8371c419b1e23455c8fa73af16793"
-  "28.0.1":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.1.tar.gz"
-    sha256: "8e47386eb84eca40f8debc5d6c2752e234059e804e323aeb93f96e60e901317f"
-  "28.0.0":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.0.tar.gz"
-    sha256: "f0300db41849bbaf690c1dfb9080f3e441fc617a004283acfb2b7b25b32ff885"
-  "27.0.0":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-27.0.0.tar.gz"
-    sha256: "c8fb3f99c6fce4f170b381f3a7789c76a2ff1c23c094c9852e2e3de1fdc57277"
-  "0.0.0":
-    git: "https://github.com/ncbi/ncbi-cxx-toolkit-public.git"
-    branch: "main"
 
 patches:
+  "30.2.0":
+    - patch_file: "patches/30.2.0-fix-export-single-config-win.patch"
   "29.10.0":
     - patch_file: "patches/29.10.0-ncbiptb.patch"
-  "29.0.0":
-    - patch_file: "patches/29.0.0-ncbiptb.patch"
-  "27.0.0":
-    - patch_file: "patches/27.0.0-compiler.patch"
-    - patch_file: "patches/27.0.0-install.patch"
-    - patch_file: "patches/27.0.0-definitions.patch"

@@ -44,7 +44,7 @@ If needed, upgrade Conan installation:
 
     pip install conan --upgrade
 
-Next, check the list of Conan repositories and add *center.conan.io*:
+Next, check the list of Conan repositories and add *center2.conan.io*:
 
     $ conan remote add conancenter https://center2.conan.io
     $ conan remote list
@@ -69,7 +69,7 @@ Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
     cd ncbi-cxx-toolkit-conan
-    conan export . --version 30.0.0
+    conan export . --version 30.2.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
@@ -89,14 +89,14 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
         settings = "os", "compiler", "build_type", "arch"
         generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
         def requirements(self):
-            self.requires("ncbi-cxx-toolkit-public/[>=29]")
+            self.requires("ncbi-cxx-toolkit-public/[~30]")
         def layout(self):
             cmake_layout(self, src_folder=".")
 
 It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/conanfile_txt.html) - a simplified version of *conanfile.py*:
 
     [requires]
-    ncbi-cxx-toolkit-public/30.0.0
+    ncbi-cxx-toolkit-public/30.2.0
     [layout]
     cmake_layout
     [generators]
