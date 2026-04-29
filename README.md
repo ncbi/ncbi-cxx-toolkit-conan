@@ -38,13 +38,13 @@ Install Conan:
 
 or, to install a specific version:
 
-    pip install conan==2.13.0
+    pip install conan==2.27.0
 
 If needed, upgrade Conan installation:
 
     pip install conan --upgrade
 
-Next, check the list of Conan repositories and add *center2.conan.io*:
+Next, check the list of Conan repositories and add *center2.conan.io*, if needed:
 
     $ conan remote add conancenter https://center2.conan.io
     $ conan remote list
@@ -68,8 +68,7 @@ Profiles can only be edited manually. Find profile location:
 Clone this repository and export the recipe into the local Conan cache:
 
     git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
-    cd ncbi-cxx-toolkit-conan
-    conan export . --version 30.2.0
+    conan export ncbi-cxx-toolkit-conan --version 30.2.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
@@ -92,6 +91,10 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
             self.requires("ncbi-cxx-toolkit-public/[~30]")
         def layout(self):
             cmake_layout(self, src_folder=".")
+        def build(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
 It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/conanfile_txt.html) - a simplified version of *conanfile.py*:
 
@@ -111,10 +114,17 @@ Add *CMakeLists.txt* (*blastinput* library is included into *blast* [component](
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    set(ncbitk ncbi-cxx-toolkit-public)
-    find_package(${ncbitk} REQUIRED)
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     add_executable(blast_demo blast_demo.cpp)
-    target_link_libraries(blast_demo ${ncbitk}::blast)
+    target_link_libraries(blast_demo ncbi-cxx-toolkit-public::blast)
+
+[Build](https://docs.conan.io/2/reference/commands/build.html) the application:
+
+    conan build . -s build_type=Release
+
+Conan installs dependencies, and executes the recipe's *build* method, which runs cmake configure and build.
+
+Another options is to run CMake manually:
 
 Install build requirements, in the source directory run
 
@@ -286,7 +296,7 @@ First two parameters to *NCBI_generate_cpp* receive lists of generated files - s
 First, make sure your project contains proper requirements. For example, conanfile.txt may request *protobuf* and *grpc*:
 
     [requires]
-    ncbi-cxx-toolkit-public/30.0.0
+    ncbi-cxx-toolkit-public/30.2.0
     protobuf/5.27.0
     grpc/1.72.0
 
