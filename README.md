@@ -83,7 +83,7 @@ What we know for sure is that we need *blastinput* library.
 Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*](https://docs.conan.io/2/reference/conanfile.html):
 
     from conan import ConanFile
-    from conan.tools.cmake import cmake_layout
+    from conan.tools.cmake import cmake_layout, CMake
     class NCBIapp(ConanFile):
         settings = "os", "compiler", "build_type", "arch"
         generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
