@@ -138,10 +138,10 @@ The third file *CMakeLists.txt* (*blastinput* library is included into
 with the following content:
 
     cmake_minimum_required(VERSION 3.16)
-    project(conanapp)
-    find_package(ncbi-cxx-toolkit-core REQUIRED)
+    project(my_blast_demo_app)
+    find_package(ncbi-cxx-toolkit-public REQUIRED)
     add_executable(blast_demo blast_demo.cpp)
-    target_link_libraries(blast_demo ncbi-cxx-toolkit-core::blast)
+    target_link_libraries(blast_demo ncbi-cxx-toolkit-public::blast)
 
 [Build](https://docs.conan.io/2/reference/commands/build.html) the application:
 
@@ -149,7 +149,7 @@ with the following content:
 
 Conan installs dependencies, and executes the recipe's *build* method, which runs cmake configure and build.
 Upon a successful completion the application binary will be located at
-~/blast_demo/build/Release/blast_demo.
+*~/blast_demo/build/Release/blast_demo*.
 
 Another options is to run CMake manually:
 
