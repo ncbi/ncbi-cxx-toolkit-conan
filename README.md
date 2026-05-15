@@ -30,45 +30,70 @@ then the Toolkit itself. It is not always clear what exactly is required. Conan'
 <a name="recipe_Env"></a>
 ## Preparing work environment.
 
-First, you need Conan (and, to install Conan, you need Python). For instructions of how to install Conan, please refer to [Conan's documentation](https://docs.conan.io/2/installation.html).
+First, you need Conan (and, to install Conan, you need Python).
+For detailed instructions of how to install Conan,
+please refer to [Conan's documentation](https://docs.conan.io/2/installation.html).
 
-Install Conan:
+Create a python virtual environment and activate it:
+    $ cd ~
+    $ python -m venv demo_venv
+    $ source ~/demo_venv/bin/activate
 
-    pip install conan
+Install Conan python package:
 
-or, to install a specific version:
+    (demo_venv) $ pip install conan
 
-    pip install conan==2.27.0
+The command above installs the latest version of the Conan package. It should
+work in most of the cases however a particular version could also be specified,
+e.g.:
 
-If needed, upgrade Conan installation:
+    (demo_venv) $ pip install conan==2.28.1
 
-    pip install conan --upgrade
+
+If a previously existed python virtual environment was used then it could have
+had an old version of the Conan package. In this case the Conan package can be
+upgraded:
+
+    (demo_venv) $ pip install conan --upgrade
 
 Next, check the list of Conan repositories and add *center2.conan.io*, if needed:
 
-    $ conan remote add conancenter https://center2.conan.io
-    $ conan remote list
+    (demo_venv) $ conan remote add conancenter https://center2.conan.io
+    (demo_venv) $ conan remote list
     conancenter: https://center2.conan.io [Verify SSL: True]
 
 Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
-in user home directory, which, most likely does not have enough space. To place Conan's cache into another location, 
+in the user home directory. If by some reasons the user home directory does not have enough space
+then the Conan's cache location needs to be moved somewhere else. To do so
 you should define [CONAN_HOME](https://docs.conan.io/2/reference/environment.html) environment variable.
 
 Check the list of Conan [profiles](https://docs.conan.io/2/reference/commands/profile.html). Create *default* one:
 
-    conan profile list
-    conan profile detect
-    conan profile show
+    (demo_venv) $ conan profile list
+    (demo_venv) $ conan profile detect
+    (demo_venv) $ conan profile show
 
 Profiles can only be edited manually. Find profile location:
 
-    conan profile path default
+    (demo_venv) $ conan profile path default
+
+The command above prints a full path to the default profile. Open the file and
+check the compiler.cppstd entry. It should say
+
+    compiler.cppstd=gnu20
+
+Conan detection of a C++ compiler standard may vary. E.g. some "reasonably
+gnu20 capable" compilers such as GCC-13 will be detected as gnu17 (because they
+run in the gnu17 mode by default). In such cases the detected value must be
+manually adjusted in the conan profile. The NCBI C++ Toolkit requires C++
+standard at least gnu20.
+
 
 Clone this repository and export the recipe into the local Conan cache:
 
-    git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
-    conan export ncbi-cxx-toolkit-conan --version 30.2.0
+    (demo_venv) $ git clone https://github.com/ncbi/ncbi-cxx-toolkit-conan.git
+    (demo_venv) $ conan export ncbi-cxx-toolkit-conan --version 30.2.0
 
 Please check *conandata.yml* file in this repository for the list of existing NCBI C++ Toolkit versions.
 
@@ -76,11 +101,23 @@ Please check *conandata.yml* file in this repository for the list of existing NC
 <a name="recipe_Build"></a>
 ## Building your project.
 
-Let us build [blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt) sample application.
-It requires one source file and some unknown number of the Toolkit libraries. 
-What we know for sure is that we need *blastinput* library.
+Building of an application is demonstrated using a
+[blast_demo](https://github.com/ncbi/ncbi-cxx-toolkit-public/blob/master/src/sample/app/blast/CMakeLists.blast_demo.app.txt)
+sample application. In addition to the source code of the application some
+NCBI C++ toolkit libraries are required. What we know for sure is that we need *blastinput* library.
+Let's create a working directory for the demo application:
 
-Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*](https://docs.conan.io/2/reference/conanfile.html):
+    $ mkdir ~/blast_demo
+    $ cd ~/blast_demo
+
+To build it locally 3 files are needed. First is the application C++ source
+file. It can be retrieved from a NCBI C++ Toolkit github repository as follows:
+
+    $ wget https://raw.githubusercontent.com/ncbi/ncbi-cxx-toolkit-public/master/src/sample/app/blast/blast_demo.cpp
+
+
+The second file [*conanfile.py*](https://docs.conan.io/2/reference/conanfile.html)
+needs to be created manually with the following content:
 
     from conan import ConanFile
     from conan.tools.cmake import cmake_layout, CMake
@@ -96,33 +133,23 @@ Copy *blast_demo.cpp* into a local directory. Next to it, create [*conanfile.py*
             cmake.configure()
             cmake.build()
 
-It is also possible to use [*conanfile.txt*](https://docs.conan.io/2/reference/conanfile_txt.html) - a simplified version of *conanfile.py*:
-
-    [requires]
-    ncbi-cxx-toolkit-public/30.2.0
-    [layout]
-    cmake_layout
-    [generators]
-    CMakeDeps
-    CMakeToolchain
-    VirtualRunEnv
-
-It is difficult to say what is better, but *conanfile.py* definitely provides greater
-[flexibility](https://docs.conan.io/2/tutorial/consuming_packages/the_flexibility_of_conanfile_py.html)
-
-Add *CMakeLists.txt* (*blastinput* library is included into *blast* [component](#recipe_Components)):
+The third file *CMakeLists.txt* (*blastinput* library is included into
+*blast* [component](#recipe_Components)) needs to be created manually as well
+with the following content:
 
     cmake_minimum_required(VERSION 3.16)
     project(conanapp)
-    find_package(ncbi-cxx-toolkit-public REQUIRED)
+    find_package(ncbi-cxx-toolkit-core REQUIRED)
     add_executable(blast_demo blast_demo.cpp)
-    target_link_libraries(blast_demo ncbi-cxx-toolkit-public::blast)
+    target_link_libraries(blast_demo ncbi-cxx-toolkit-core::blast)
 
 [Build](https://docs.conan.io/2/reference/commands/build.html) the application:
 
-    conan build . -s build_type=Release
+    (demo_venv) $ conan build . -s build_type=Release --build missing
 
 Conan installs dependencies, and executes the recipe's *build* method, which runs cmake configure and build.
+Upon a successful completion the application binary will be located at
+~/blast_demo/build/Release/blast_demo.
 
 Another options is to run CMake manually:
 
