@@ -35,6 +35,7 @@ For detailed instructions of how to install Conan,
 please refer to [Conan's documentation](https://docs.conan.io/2/installation.html).
 
 Create a python virtual environment and activate it:
+
     $ cd ~
     $ python -m venv demo_venv
     $ source ~/demo_venv/bin/activate
@@ -62,7 +63,10 @@ Next, check the list of Conan repositories and add *center2.conan.io*, if needed
     (demo_venv) $ conan remote list
     conancenter: https://center2.conan.io [Verify SSL: True]
 
-Make sure *cmake* is found in *PATH*. On MacOS and Windows this might require correcting the *PATH* environment variable.
+Install *cmake*:
+
+    (demo_env) $ pip install cmake
+
 Finally. NCBI C++ Toolkit is large. Building it locally requires a lot of disk space. By default, Conan's local cache is located 
 in the user home directory. If by some reasons the user home directory does not have enough space
 then the Conan's cache location needs to be moved somewhere else. To do so
